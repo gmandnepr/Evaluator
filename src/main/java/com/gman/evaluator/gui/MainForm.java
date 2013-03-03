@@ -1,6 +1,7 @@
 package com.gman.evaluator.gui;
 
 import com.gman.evaluator.engine.Currency;
+import com.gman.evaluator.engine.DataHolder;
 import com.gman.evaluator.engine.Evaluation;
 import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
@@ -8,9 +9,10 @@ import com.gman.evaluator.engine.Parameter;
 import com.gman.evaluator.engine.Parser;
 import com.gman.evaluator.engine.ParserFactory;
 import com.gman.evaluator.engine.Rule;
-import com.gman.evaluator.engine.UrlGenerator;
+import com.gman.evaluator.engine.Rules;
 import com.gman.evaluator.engine.parameters.Counter;
-import com.gman.evaluator.engine.services.DataExtractingService;
+import com.gman.evaluator.engine.services.DataLoadingAndParsingService;
+import com.gman.evaluator.engine.services.DataReadingService;
 import com.gman.evaluator.engine.services.EvaluatingCarService;
 import com.gman.evaluator.engine.services.EvaluatingService;
 import com.gman.evaluator.engine.services.OfferingService;
@@ -23,17 +25,86 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author gman
  * @since 26.11.12 20:02
  */
 public class MainForm extends JFrame {
+
+    //holders
+    private final DataHolder<DataLoadingAndParsingService.Config> dataLoadingAndParsingConfigHolder =
+            new DataHolder<DataLoadingAndParsingService.Config>(true) {
+        @Override
+        protected DataLoadingAndParsingService.Config initialValue() {
+            return DataLoadingAndParsingService.Config.create(sources.getData(), parameters.getData(), parsers.getData());
+        }
+    };
+    private final DataHolder<Rules> rulesHolder = new DataHolder<Rules>(true) {
+        @Override
+        protected Rules initialValue() {
+            return new Rules(rules.getData());
+        }
+    };
+    private final DataHolder<Items> allItemsHolder = new DataHolder<Items>() {
+        @Override
+        protected Items initialValue() {
+            try {
+                final int option = ComponentUtils.showOptionsDialog("Obtain data", "From selected urls", "From disc", "Restart");
+                switch (option) {//TODO loading screen, may be use global task monitor
+                    case 0:
+                        return dataLoadingAndParsingService.call();
+                    case 1:
+                        return dataReadingService.call();
+                    default:
+                        return null;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void afterUpdate() {
+            allItemTableModel.setItems(get());
+        }
+    };
+    private final DataHolder<Evaluation> evaluationHolder = new DataHolder<Evaluation>() {
+        @Override
+        protected Evaluation initialValue() {
+            try {
+                return evaluatingService.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void afterUpdate() {
+            evaluationsTableModel.setEvaluation(get());
+        }
+    };
+    private final DataHolder<Items> offerItemsHolder = new DataHolder<Items>() {
+        @Override
+        protected Items initialValue() {
+            return super.initialValue();
+        }
+
+        @Override
+        protected void afterUpdate() {
+            offersTableModel.setItems(get());
+        }
+    };
+
+    //services
+    private final DataReadingService dataReadingService = new DataReadingService();
+    private final DataLoadingAndParsingService dataLoadingAndParsingService = new DataLoadingAndParsingService(dataLoadingAndParsingConfigHolder);
+    private final EvaluatingService evaluatingService = new EvaluatingService(allItemsHolder);
+    private final OfferingService offeringService = new OfferingService(allItemsHolder, evaluationHolder, rulesHolder);
+    private final EvaluatingCarService evaluatingCarService = new EvaluatingCarService(evaluationHolder);
+
+    //forms
+    private final CustomCarInput customCarInput = new CustomCarInput(this);
 
     //model
     private final JPickListModel<Parser> parsers = new JPickListModel<Parser>();
@@ -44,18 +115,6 @@ public class MainForm extends JFrame {
     private final JPickListModel<Rule> rules = new JPickListModel<Rule>();
     private final ItemTableModel offersTableModel = new ItemTableModel();
 
-    //holders
-    private final AtomicReference<Evaluation> evaluationHolder = new AtomicReference<Evaluation>(null);
-
-    //services
-    private final DataExtractingService dataExtractingService = new DataExtractingService();
-    private final EvaluatingService evaluatingService = new EvaluatingService();
-    private final OfferingService offeringService = new OfferingService();
-    private final EvaluatingCarService evaluatingCarService = new EvaluatingCarService(evaluationHolder);
-
-    //forms
-    private final CustomCarInput customCarInput = new CustomCarInput(this);
-
     //actions
     private final LoadFromDiscAction loadFromDiscAction = new LoadFromDiscAction();
     private final LoadFromSourcesAction loadFromSourcesAction = new LoadFromSourcesAction();
@@ -64,8 +123,7 @@ public class MainForm extends JFrame {
     private final AboutAction aboutAction = new AboutAction();
     private final ExitAction exitAction = new ExitAction();
     private final EvaluateCarAction evaluateCarAction = new EvaluateCarAction();
-
-
+    private final AnalyzePriceAction analyzePriceAction = new AnalyzePriceAction();
 
     {
         parsers.addItem(ParserFactory.crete(getClass().getClassLoader().getResourceAsStream("auto_ria_ua.properties")));
@@ -93,7 +151,7 @@ public class MainForm extends JFrame {
                 ComponentUtils.activeElement(new JMenuItem("Offer"), offerAction),
                 null,
                 ComponentUtils.activeElement(new JMenuItem("Evaluate my car"), evaluateCarAction),
-                ComponentUtils.activeElement(new JMenuItem("Analyze prices"), null),
+                ComponentUtils.activeElement(new JMenuItem("Analyze prices"), analyzePriceAction),
                 null,
                 ComponentUtils.activeElement(new JMenuItem("Exit"), exitAction)
         ));
@@ -136,53 +194,27 @@ public class MainForm extends JFrame {
         return allItemTableModel;
     }
 
-    private void setItems(Items items) {
-        allItemTableModel.setItems(items);
-    }
-
-    private void setEvaluation(Evaluation evaluation) {
-        evaluationHolder.set(evaluation);
-        evaluationsTableModel.setEvaluation(evaluation);
-    }
-
-    private void setOffer(Items items) {
-        offersTableModel.setItems(items);
-    }
-
     private final class LoadFromDiscAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ComponentUtils.openFileOperation(new ComponentUtils.OpenFileOperation() {
-                @Override
-                public void perform(InputStream is) throws IOException {
-                    try {
-                        MainForm.this.setItems((Items) new ObjectInputStream(is).readObject());
-                    } catch (ClassNotFoundException e1) {
-                        throw new IOException(e1);
-                    }
-                }
-            });
+            ComponentUtils.executeWithProgressMonitor(MainForm.this,
+                    new ComponentUtils.BackgroundProcessable<Items>(dataReadingService) {
+                        @Override
+                        public void setResult() {
+                            MainForm.this.allItemsHolder.set(getSuccessFullResult());
+                        }
+                    });
         }
     }
 
     private final class LoadFromSourcesAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            final java.util.List<UrlGenerator> generators = new ArrayList<UrlGenerator>();
-            for (String source : sources.getData()) {
-                generators.add(new UrlGenerator(source, parameters.getData()));
-            }
-            dataExtractingService.setParsers(parsers.getData());
-            dataExtractingService.setUrlGenerators(generators);
             ComponentUtils.executeWithProgressMonitor(MainForm.this,
-                    new ComponentUtils.BackgroundProcessable<Items>(dataExtractingService) {
+                    new ComponentUtils.BackgroundProcessable<Items>(dataLoadingAndParsingService) {
                         @Override
                         public void setResult() {
-                            try {
-                                MainForm.this.setItems(getResult());
-                            } catch (Exception ex) {
-                                ComponentUtils.showErrorDialog(ex);
-                            }
+                            MainForm.this.allItemsHolder.set(getSuccessFullResult());
                         }
                     });
         }
@@ -191,16 +223,11 @@ public class MainForm extends JFrame {
     private final class EvaluateAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            evaluatingService.setItems(allItemTableModel.getItems());
             ComponentUtils.executeWithProgressMonitor(MainForm.this,
                     new ComponentUtils.BackgroundProcessable<Evaluation>(evaluatingService) {
                         @Override
                         public void setResult() {
-                            try {
-                                MainForm.this.setEvaluation(getResult());
-                            } catch (Exception ex) {
-                                ComponentUtils.showErrorDialog(ex);
-                            }
+                            MainForm.this.evaluationHolder.set(getSuccessFullResult());
                         }
                     });
         }
@@ -209,18 +236,11 @@ public class MainForm extends JFrame {
     private final class OfferAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            offeringService.setItems(allItemTableModel.getItems());
-            offeringService.setEvaluation(evaluationHolder.get());
-            offeringService.setRules(rules.getData());
             ComponentUtils.executeWithProgressMonitor(MainForm.this,
                     new ComponentUtils.BackgroundProcessable<Items>(offeringService) {
                         @Override
                         public void setResult() {
-                            try {
-                                MainForm.this.setOffer(getResult());
-                            } catch (Exception ex) {
-                                ComponentUtils.showErrorDialog(ex);
-                            }
+                            MainForm.this.offerItemsHolder.set(getSuccessFullResult());
                         }
                     });
         }
@@ -255,6 +275,13 @@ public class MainForm extends JFrame {
                     ComponentUtils.showErrorDialog(e1);
                 }
             }
+        }
+    }
+
+    private final class AnalyzePriceAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ComponentUtils.showMessage("Not ready yet");
         }
     }
 

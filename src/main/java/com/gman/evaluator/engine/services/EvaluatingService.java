@@ -4,6 +4,7 @@ import com.gman.evaluator.engine.Evaluation;
 import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
 import com.gman.evaluator.engine.Matrix;
+import com.gman.evaluator.engine.DataHolder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,42 +17,42 @@ import java.util.Set;
  */
 public class EvaluatingService extends AbstractService<Evaluation> {
 
-    private Items items;
+    private final DataHolder<Items> items;
+
     private List<String> extractedProperties;
 
-    public EvaluatingService() {
+    public EvaluatingService(DataHolder<Items> items) {
         super("Evaluating service");
-    }
-
-    public void setItems(Items items) {
         this.items = items;
     }
 
     @Override
     public Evaluation call() throws Exception {
+        final Items processing = items.get();
+        if (processing.isEmpty()) {
+            throw new IllegalStateException("Nothing to evaluate!");
+        }
+
         callback.processed("Creating matrix x", 0);
-        final Matrix x = createMatrixX();
+        final Matrix x = createMatrixX(processing);
         callback.processed("Creating matrix y", 20);
-        final Matrix y = createMatrixY();
+        final Matrix y = createMatrixY(processing);
         callback.processed("Processing matrix", 40);
         final Matrix a = countRegressionCoefficients(x, y);
         callback.processed("Done", 100);
         return extractEvaluation(a);
     }
 
-    private Matrix createMatrixX() {
-        if (items.isEmpty()) {
-            throw new IllegalStateException("Nothing to evaluate!");
-        }
+    private Matrix createMatrixX(Items processing) {
         final Set<String> combinedProperties = new HashSet<String>();
-        for (Item item : items) {
+        for (Item item : processing) {
             combinedProperties.addAll(item.getDeclaredProperties());
         }
         extractedProperties = new ArrayList<String>(combinedProperties);
         final int propertiesNum = extractedProperties.size();
-        final Matrix x = new Matrix(items.size(), 1 + propertiesNum);
+        final Matrix x = new Matrix(processing.size(), 1 + propertiesNum);
         int i = 0;
-        for (Item item : items) {
+        for (Item item : processing) {
             x.setElement(i, 0, 1.0);
             for (int p = 0; p < propertiesNum; p++) {
                 x.setElement(i, p + 1, item.getProperty(extractedProperties.get(p)));
@@ -61,10 +62,10 @@ public class EvaluatingService extends AbstractService<Evaluation> {
         return x;
     }
 
-    private Matrix createMatrixY() {
-        final Matrix y = new Matrix(items.size(), 1);
+    private Matrix createMatrixY(Items processing) {
+        final Matrix y = new Matrix(processing.size(), 1);
         int i = 0;
-        for (Item item : items) {
+        for (Item item : processing) {
             y.setElement(i, 0, item.getPrice());
             i++;
         }

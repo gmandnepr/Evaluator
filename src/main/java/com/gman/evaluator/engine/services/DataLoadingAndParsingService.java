@@ -1,7 +1,9 @@
 package com.gman.evaluator.engine.services;
 
+import com.gman.evaluator.engine.DataHolder;
 import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
+import com.gman.evaluator.engine.Parameter;
 import com.gman.evaluator.engine.Parser;
 import com.gman.evaluator.engine.UrlGenerator;
 import com.gman.evaluator.engine.UrlUtils;
@@ -18,29 +20,16 @@ import java.util.Map;
  * @author gman
  * @since 11/30/12 9:40 AM
  */
-public class DataExtractingService extends AbstractService<Items> {
+public class DataLoadingAndParsingService extends AbstractService<Items> {
 
     private static final int HTTP_OK = 200;
 
     private final Client client = Client.create();
-    private final List<UrlGenerator> urlGenerators = new ArrayList<UrlGenerator>();
-    private final Map<String, Parser> parsers = new HashMap<String, Parser>();
+    private final DataHolder<Config> configHolder;
 
-    public DataExtractingService() {
+    public DataLoadingAndParsingService(DataHolder<Config> configHolder) {
         super("Extracting data");
-    }
-
-    public void setUrlGenerators(List<UrlGenerator> urlGenerators) {
-        this.urlGenerators.clear();
-        this.urlGenerators.addAll(urlGenerators);
-    }
-
-    public void setParsers(List<Parser> parsers) {
-        this.parsers.clear();
-        for (Parser parser : parsers) {
-            final String url = UrlUtils.extractSite(parser.getProperties().getTarget());
-            this.parsers.put(url, parser);
-        }
+        this.configHolder = configHolder;
     }
 
     @Override
@@ -50,14 +39,16 @@ public class DataExtractingService extends AbstractService<Items> {
         int processedSize = 0;
         int totalSize = 0;
 
+        final Config usedConfig = configHolder.get();
+
         final Items items = new Items();
 
-        for (final UrlGenerator urlGenerator : urlGenerators) {
+        for (final UrlGenerator urlGenerator : usedConfig.urlGenerators) {
             totalSize += urlGenerator.urlsCount();
         }
 
-        for (final UrlGenerator urlGenerator : urlGenerators) {
-            final Parser parser = parsers.get(urlGenerator.getSite());
+        for (final UrlGenerator urlGenerator : usedConfig.urlGenerators) {
+            final Parser parser = usedConfig.parsers.get(urlGenerator.getSite());
             if (parser != null) {
                 items.registerProperties(parser.getProperties().getFieldDefinitions());
                 for (final String url : urlGenerator) {
@@ -82,4 +73,28 @@ public class DataExtractingService extends AbstractService<Items> {
 
         return items;
     }
+
+    public static final class Config {
+        private final List<UrlGenerator> urlGenerators;
+        private final Map<String, Parser> parsers;
+
+        public Config(List<UrlGenerator> urlGenerators, Map<String, Parser> parsers) {
+            this.urlGenerators = urlGenerators;
+            this.parsers = parsers;
+        }
+
+        public static Config create(List<String> sources, List<Parameter<?>> parameters, List<Parser> parsers) {
+            final List<UrlGenerator> generators = new ArrayList<UrlGenerator>();
+            for (String source : sources) {
+                generators.add(new UrlGenerator(source, parameters));
+            }
+            final Map<String, Parser> parsersMap = new HashMap<String, Parser>();
+            for (Parser parser : parsers) {
+                final String url = UrlUtils.extractSite(parser.getProperties().getTarget());
+                parsersMap.put(url, parser);
+            }
+            return new Config(generators, parsersMap);
+        }
+    }
+
 }

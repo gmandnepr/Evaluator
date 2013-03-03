@@ -2,8 +2,7 @@ package com.gman.evaluator.engine.services;
 
 import com.gman.evaluator.engine.Evaluation;
 import com.gman.evaluator.engine.Item;
-
-import java.util.concurrent.atomic.AtomicReference;
+import com.gman.evaluator.engine.DataHolder;
 
 /**
  * @author gman
@@ -12,9 +11,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class EvaluatingCarService extends AbstractService<Double> {
 
     private Item item;
-    private final AtomicReference<Evaluation> evaluationHolder;
+    private final DataHolder<Evaluation> evaluationHolder;
 
-    public EvaluatingCarService(AtomicReference<Evaluation> evaluationHolder) {
+    public EvaluatingCarService(DataHolder<Evaluation> evaluationHolder) {
         super("Evaluate custom car");
         this.evaluationHolder = evaluationHolder;
     }

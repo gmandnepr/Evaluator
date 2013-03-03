@@ -51,6 +51,10 @@ public final class ComponentUtils {
         return element;
     }
 
+    public static int showOptionsDialog(String message, String... options) {
+        return JOptionPane.showOptionDialog(null, message, "Select", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+    }
+
     public static void showMessage(String message) {
         JOptionPane.showMessageDialog(null, message, "info", JOptionPane.INFORMATION_MESSAGE);
     }
@@ -107,6 +111,15 @@ public final class ComponentUtils {
                 throw e;
             }
             return result;
+        }
+
+        public T getSuccessFullResult() {
+            try {
+                return getResult();
+            } catch (Exception ex) {
+                ComponentUtils.showErrorDialog(ex);
+                throw new RuntimeException(e);
+            }
         }
 
         public Processable<T> getProcessable() {

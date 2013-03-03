@@ -1,14 +1,14 @@
 package com.gman.evaluator.engine.services;
 
+import com.gman.evaluator.engine.DataHolder;
 import com.gman.evaluator.engine.Evaluation;
 import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.ItemWithProfit;
 import com.gman.evaluator.engine.Items;
-import com.gman.evaluator.engine.Rule;
+import com.gman.evaluator.engine.Rules;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * @author gman
@@ -18,38 +18,33 @@ public class OfferingService extends AbstractService<Items> {
 
     private static final ProfitComparator PROFIT_COMPARATOR = new ProfitComparator();
 
-    private List<Rule> rules = Collections.emptyList();
-    private Evaluation evaluation;
-    private Items items;
+    private final DataHolder<Items> items;
+    private final DataHolder<Evaluation> evaluation;
+    private final DataHolder<Rules> rules;
 
-    public OfferingService() {
+    public OfferingService(DataHolder<Items> items, DataHolder<Evaluation> evaluation, DataHolder<Rules> rules) {
         super("Offering service");
-    }
-
-    public void setRules(List<Rule> rules) {
-        this.rules = rules;
-    }
-
-    public void setEvaluation(Evaluation evaluation) {
-        this.evaluation = evaluation;
-    }
-
-    public void setItems(Items items) {
         this.items = items;
+        this.evaluation = evaluation;
+        this.rules = rules;
     }
 
     @Override
     public Items call() throws Exception {
 
+        final Items processingItems = items.get();
+        final Evaluation usedEvaluation = evaluation.get();
+        final Rules usedRules = rules.get();
+
         callback.processed("Filtering", 0);
 
         final Items offer = new Items();
-        offer.registerProperties(items.getRegisteredFields());
+        offer.registerProperties(processingItems.getRegisteredFields());
         offer.registerProperty(ItemWithProfit.PROFIT_DEFINITION);
 
-        for (Item item : items) {
-            if (satisfyAll(item)) {
-                offer.add(new ItemWithProfit(item, evaluation.countProfitFor(item)));
+        for (Item item : processingItems) {
+            if (usedRules.satisfyAll(item)) {
+                offer.add(new ItemWithProfit(item, usedEvaluation.countProfitFor(item)));
             }
         }
 
@@ -60,15 +55,6 @@ public class OfferingService extends AbstractService<Items> {
         callback.processed("Done", 100);
 
         return offer;
-    }
-
-    private boolean satisfyAll(Item item) {
-        for (Rule rule : rules) {
-            if (!rule.satisfy(item)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static class ProfitComparator implements Comparator<Item> {
