@@ -18,8 +18,24 @@ public class Evaluation {
         this.prices.put(field, price);
     }
 
+    public Double getPrice(String field) {
+        return this.prices.get(field);
+    }
+
     public Set<Map.Entry<String, Double>> getFieldsAndPrices() {
         return this.prices.entrySet();
+    }
+
+    public double countPriceFor(Item item) {
+        double itemPrice = 0.0;
+        for (Map.Entry<String, Double> price : prices.entrySet()) {
+            if (price.getKey().equals(BASE)) {
+                itemPrice += price.getValue();
+            } else {
+                itemPrice += item.getProperty(price.getKey()) * price.getValue();
+            }
+        }
+        return itemPrice;
     }
 
     public double countProfitFor(Item item) {

@@ -31,6 +31,18 @@ public class Items extends ArrayList<Item> {
         fieldDefinitions.clear();
     }
 
+    public Items copyStructure() {
+        final Items copy = new Items();
+        copy.registerProperties(getRegisteredFields());
+        return copy;
+    }
+
+    public Items copyAll() {
+        final Items copy = copyStructure();
+        copy.addAll(this);
+        return copy;
+    }
+
     public static final Items EMPTY = new Items() {
 
         @Override
