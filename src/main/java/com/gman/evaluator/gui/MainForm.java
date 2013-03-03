@@ -2,6 +2,7 @@ package com.gman.evaluator.gui;
 
 import com.gman.evaluator.engine.Currency;
 import com.gman.evaluator.engine.Evaluation;
+import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
 import com.gman.evaluator.engine.Parameter;
 import com.gman.evaluator.engine.Parser;
@@ -10,6 +11,7 @@ import com.gman.evaluator.engine.Rule;
 import com.gman.evaluator.engine.UrlGenerator;
 import com.gman.evaluator.engine.parameters.Counter;
 import com.gman.evaluator.engine.services.DataExtractingService;
+import com.gman.evaluator.engine.services.EvaluatingCarService;
 import com.gman.evaluator.engine.services.EvaluatingService;
 import com.gman.evaluator.engine.services.OfferingService;
 import com.gman.evaluator.gui.components.ParameterCreator;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author gman
@@ -41,10 +44,17 @@ public class MainForm extends JFrame {
     private final JPickListModel<Rule> rules = new JPickListModel<Rule>();
     private final ItemTableModel offersTableModel = new ItemTableModel();
 
+    //holders
+    private final AtomicReference<Evaluation> evaluationHolder = new AtomicReference<Evaluation>(null);
+
     //services
     private final DataExtractingService dataExtractingService = new DataExtractingService();
     private final EvaluatingService evaluatingService = new EvaluatingService();
     private final OfferingService offeringService = new OfferingService();
+    private final EvaluatingCarService evaluatingCarService = new EvaluatingCarService(evaluationHolder);
+
+    //forms
+    private final CustomCarInput customCarInput = new CustomCarInput(this);
 
     //actions
     private final LoadFromDiscAction loadFromDiscAction = new LoadFromDiscAction();
@@ -52,6 +62,10 @@ public class MainForm extends JFrame {
     private final EvaluateAction evaluateAction = new EvaluateAction();
     private final OfferAction offerAction = new OfferAction();
     private final AboutAction aboutAction = new AboutAction();
+    private final ExitAction exitAction = new ExitAction();
+    private final EvaluateCarAction evaluateCarAction = new EvaluateCarAction();
+
+
 
     {
         parsers.addItem(ParserFactory.crete(getClass().getClassLoader().getResourceAsStream("auto_ria_ua.properties")));
@@ -76,7 +90,12 @@ public class MainForm extends JFrame {
                 ComponentUtils.activeElement(new JMenuItem("Load from disc"), loadFromDiscAction),
                 ComponentUtils.activeElement(new JMenuItem("Load from sources"), loadFromSourcesAction),
                 ComponentUtils.activeElement(new JMenuItem("Evaluate"), evaluateAction),
-                ComponentUtils.activeElement(new JMenuItem("Offer"), offerAction)
+                ComponentUtils.activeElement(new JMenuItem("Offer"), offerAction),
+                null,
+                ComponentUtils.activeElement(new JMenuItem("Evaluate my car"), evaluateCarAction),
+                ComponentUtils.activeElement(new JMenuItem("Analyze prices"), null),
+                null,
+                ComponentUtils.activeElement(new JMenuItem("Exit"), exitAction)
         ));
         menu.add(ComponentUtils.menu("Exchange rate",
                 ComponentUtils.activeElement(new JMenuItem("for USD"), new ExchangeRateAction(Currency.USD)),
@@ -117,14 +136,27 @@ public class MainForm extends JFrame {
         return allItemTableModel;
     }
 
-    private class LoadFromDiscAction implements ActionListener {
+    private void setItems(Items items) {
+        allItemTableModel.setItems(items);
+    }
+
+    private void setEvaluation(Evaluation evaluation) {
+        evaluationHolder.set(evaluation);
+        evaluationsTableModel.setEvaluation(evaluation);
+    }
+
+    private void setOffer(Items items) {
+        offersTableModel.setItems(items);
+    }
+
+    private final class LoadFromDiscAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             ComponentUtils.openFileOperation(new ComponentUtils.OpenFileOperation() {
                 @Override
                 public void perform(InputStream is) throws IOException {
                     try {
-                        allItemTableModel.setItems((Items) new ObjectInputStream(is).readObject());
+                        MainForm.this.setItems((Items) new ObjectInputStream(is).readObject());
                     } catch (ClassNotFoundException e1) {
                         throw new IOException(e1);
                     }
@@ -133,7 +165,7 @@ public class MainForm extends JFrame {
         }
     }
 
-    private class LoadFromSourcesAction implements ActionListener {
+    private final class LoadFromSourcesAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             final java.util.List<UrlGenerator> generators = new ArrayList<UrlGenerator>();
@@ -147,7 +179,7 @@ public class MainForm extends JFrame {
                         @Override
                         public void setResult() {
                             try {
-                                allItemTableModel.setItems(getResult());
+                                MainForm.this.setItems(getResult());
                             } catch (Exception ex) {
                                 ComponentUtils.showErrorDialog(ex);
                             }
@@ -156,7 +188,7 @@ public class MainForm extends JFrame {
         }
     }
 
-    private class EvaluateAction implements ActionListener {
+    private final class EvaluateAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             evaluatingService.setItems(allItemTableModel.getItems());
@@ -165,7 +197,7 @@ public class MainForm extends JFrame {
                         @Override
                         public void setResult() {
                             try {
-                                evaluationsTableModel.setEvaluation(getResult());
+                                MainForm.this.setEvaluation(getResult());
                             } catch (Exception ex) {
                                 ComponentUtils.showErrorDialog(ex);
                             }
@@ -174,18 +206,18 @@ public class MainForm extends JFrame {
         }
     }
 
-    private class OfferAction implements ActionListener {
+    private final class OfferAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             offeringService.setItems(allItemTableModel.getItems());
-            offeringService.setEvaluation(evaluationsTableModel.getEvaluation());
+            offeringService.setEvaluation(evaluationHolder.get());
             offeringService.setRules(rules.getData());
             ComponentUtils.executeWithProgressMonitor(MainForm.this,
                     new ComponentUtils.BackgroundProcessable<Items>(offeringService) {
                         @Override
                         public void setResult() {
                             try {
-                                offersTableModel.setItems(getResult());
+                                MainForm.this.setOffer(getResult());
                             } catch (Exception ex) {
                                 ComponentUtils.showErrorDialog(ex);
                             }
@@ -194,10 +226,35 @@ public class MainForm extends JFrame {
         }
     }
 
-    private class AboutAction implements ActionListener {
+    private final class AboutAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             ComponentUtils.showMessage("Created by gman. \n mailto : gmandnepr@gmail.com");
+        }
+    }
+
+    private final class ExitAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            MainForm.this.setVisible(false);
+            MainForm.this.dispose();
+        }
+    }
+
+    private final class EvaluateCarAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            customCarInput.setVisible(true);
+            final Item itemToEvaluate = customCarInput.getCreatedItem();
+            if (itemToEvaluate != null) {
+                evaluatingCarService.setItem(itemToEvaluate);
+                try {
+                    final long estimatedPrice = Math.round(evaluatingCarService.call());
+                    ComponentUtils.showMessage("Estimated price is: " + estimatedPrice);
+                } catch (Exception e1) {
+                    ComponentUtils.showErrorDialog(e1);
+                }
+            }
         }
     }
 

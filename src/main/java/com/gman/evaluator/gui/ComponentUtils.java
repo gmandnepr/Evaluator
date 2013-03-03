@@ -37,7 +37,11 @@ public final class ComponentUtils {
     public static JMenu menu(String name, JMenuItem... items) {
         final JMenu menu = new JMenu(name);
         for (JMenuItem item : items) {
-            menu.add(item);
+            if (item != null) {
+                menu.add(item);
+            } else {
+                menu.addSeparator();
+            }
         }
         return menu;
     }
@@ -56,7 +60,10 @@ public final class ComponentUtils {
         for (StackTraceElement ste : e.getStackTrace()) {
             sb.append(ste).append('\n');
         }
+        //developer
         showErrorDialog(null, e.getMessage(), sb.toString());
+        //production
+//        showErrorDialog(null, "Error!", e.getMessage());
     }
 
     public static void showErrorDialog(JPanel parent, String title, String message) {
