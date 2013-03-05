@@ -28,7 +28,7 @@ public class PriceTrend {
     public static PriceTrend create(Item sample, List<Evaluation> evaluations) {
         final double[] prices = new double[evaluations.size()];
 
-        for (int i=0; i<prices.length; i++) {
+        for (int i = 0; i < prices.length; i++) {
             prices[i] = evaluations.get(i).countPriceFor(sample);
         }
 

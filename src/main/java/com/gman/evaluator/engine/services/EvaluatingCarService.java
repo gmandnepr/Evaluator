@@ -1,8 +1,8 @@
 package com.gman.evaluator.engine.services;
 
+import com.gman.evaluator.engine.DataHolder;
 import com.gman.evaluator.engine.Evaluation;
 import com.gman.evaluator.engine.Item;
-import com.gman.evaluator.engine.DataHolder;
 
 /**
  * @author gman

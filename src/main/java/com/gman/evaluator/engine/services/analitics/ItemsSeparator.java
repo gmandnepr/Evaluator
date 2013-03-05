@@ -10,5 +10,5 @@ import java.util.List;
  */
 public interface ItemsSeparator {
 
-    List<Items> separate(Items items);
+    List<Period> separate(Items items);
 }

@@ -12,9 +12,9 @@ import java.util.List;
  * @author gman
  * @since 2/18/13 1:58 PM
  */
-public class BySizeSeparator implements ItemsSeparator {
+public class BySizeSeparator extends AbstractItemsSeparator {
 
-    private static final int DEFAULT_SIZE = 50;
+    private static final int DEFAULT_SIZE = 100;
 
     private final int size;
 
@@ -27,7 +27,7 @@ public class BySizeSeparator implements ItemsSeparator {
     }
 
     @Override
-    public List<Items> separate(Items items) {
+    public List<Period> separate(Items items) {
 
         final Items copy = items.copyAll();
         Collections.sort(copy, new ByDateComparator());
@@ -42,7 +42,15 @@ public class BySizeSeparator implements ItemsSeparator {
             separatedItems.add(current);
         } while (!limitReached);
 
-        return separatedItems;
+        return toSortedList(separatedItems);
+    }
+
+    private List<Period> toSortedList(List<Items> separatedItems) {
+        final List<Period> items = new ArrayList<Period>(separatedItems.size());
+        for (Items entry : separatedItems) {
+            items.add(extractPeriod(entry));
+        }
+        return items;
     }
 
     private boolean copy(Items source, Items target, int startPosition, int limit) {

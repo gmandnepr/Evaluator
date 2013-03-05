@@ -1,10 +1,10 @@
 package com.gman.evaluator.engine.services;
 
+import com.gman.evaluator.engine.DataHolder;
 import com.gman.evaluator.engine.Evaluation;
 import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
 import com.gman.evaluator.engine.Matrix;
-import com.gman.evaluator.engine.DataHolder;
 
 import java.util.ArrayList;
 import java.util.HashSet;

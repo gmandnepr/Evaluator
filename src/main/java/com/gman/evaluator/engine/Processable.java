@@ -9,6 +9,4 @@ import java.util.concurrent.Callable;
 public interface Processable<V> extends Callable<V> {
 
     String getProcessName();
-
-    void setCallback(ProcessableCallback callback);
 }

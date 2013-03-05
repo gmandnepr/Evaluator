@@ -13,10 +13,10 @@ import java.util.TreeMap;
  * @author gman
  * @since 2/18/13 1:58 PM
  */
-public class ByDateSeparator implements ItemsSeparator {
+public class ByDateSeparator extends AbstractItemsSeparator {
 
     @Override
-    public List<Items> separate(Items items) {
+    public List<Period> separate(Items items) {
 
         final SimpleDateFormat byMonthFormat = new SimpleDateFormat("yyyy-MM");
 
@@ -33,10 +33,10 @@ public class ByDateSeparator implements ItemsSeparator {
         return toSortedList(separatedItems);
     }
 
-    private List<Items> toSortedList(Map<String, Items> separatedItems) {
-        final List<Items> items = new ArrayList<Items>(separatedItems.size());
+    private List<Period> toSortedList(Map<String, Items> separatedItems) {
+        final List<Period> items = new ArrayList<Period>(separatedItems.size());
         for (Map.Entry<String, Items> entry : separatedItems.entrySet()) {
-            items.add(entry.getValue());
+            items.add(extractPeriod(entry.getValue()));
         }
         return items;
     }

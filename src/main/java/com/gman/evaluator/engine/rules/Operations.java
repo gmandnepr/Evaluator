@@ -1,6 +1,17 @@
 package com.gman.evaluator.engine.rules;
 
-import com.gman.evaluator.engine.rules.operations.*;
+import com.gman.evaluator.engine.rules.operations.AfterOperation;
+import com.gman.evaluator.engine.rules.operations.BeforeOperation;
+import com.gman.evaluator.engine.rules.operations.ContainsOperation;
+import com.gman.evaluator.engine.rules.operations.EqualsOperation;
+import com.gman.evaluator.engine.rules.operations.GreaterOperation;
+import com.gman.evaluator.engine.rules.operations.GreaterOrEqualsOperation;
+import com.gman.evaluator.engine.rules.operations.IsNotOperation;
+import com.gman.evaluator.engine.rules.operations.IsNotSetOperation;
+import com.gman.evaluator.engine.rules.operations.IsOperation;
+import com.gman.evaluator.engine.rules.operations.IsSetOperation;
+import com.gman.evaluator.engine.rules.operations.LessOperation;
+import com.gman.evaluator.engine.rules.operations.LessOrEqualsOperation;
 
 /**
  * @author gman

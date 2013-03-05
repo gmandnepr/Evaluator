@@ -35,11 +35,11 @@ public class MainForm extends JFrame {
     //holders
     private final DataHolder<DataLoadingAndParsingService.Config> dataLoadingAndParsingConfigHolder =
             new DataHolder<DataLoadingAndParsingService.Config>(true) {
-        @Override
-        protected DataLoadingAndParsingService.Config initialValue() {
-            return DataLoadingAndParsingService.Config.create(sources.getData(), parameters.getData(), parsers.getData());
-        }
-    };
+                @Override
+                protected DataLoadingAndParsingService.Config initialValue() {
+                    return DataLoadingAndParsingService.Config.create(sources.getData(), parameters.getData(), parsers.getData());
+                }
+            };
     private final DataHolder<Rules> rulesHolder = new DataHolder<Rules>(true) {
         @Override
         protected Rules initialValue() {
@@ -51,7 +51,7 @@ public class MainForm extends JFrame {
         protected Items initialValue() {
             try {
                 final int option = ComponentUtils.showOptionsDialog("Obtain data", "From selected urls", "From disc", "Restart");
-                switch (option) {//TODO loading screen, may be use global task monitor
+                switch (option) {
                     case 0:
                         return dataLoadingAndParsingService.call();
                     case 1:
@@ -96,15 +96,18 @@ public class MainForm extends JFrame {
         }
     };
 
+    private final JProcessableCallbackImpl processMonitor = new JProcessableCallbackImpl(this);
+
     //services
     private final DataReadingService dataReadingService = new DataReadingService();
-    private final DataLoadingAndParsingService dataLoadingAndParsingService = new DataLoadingAndParsingService(dataLoadingAndParsingConfigHolder);
+    private final DataLoadingAndParsingService dataLoadingAndParsingService = new DataLoadingAndParsingService(processMonitor, dataLoadingAndParsingConfigHolder);
     private final EvaluatingService evaluatingService = new EvaluatingService(allItemsHolder);
     private final OfferingService offeringService = new OfferingService(allItemsHolder, evaluationHolder, rulesHolder);
     private final EvaluatingCarService evaluatingCarService = new EvaluatingCarService(evaluationHolder);
 
     //forms
     private final CustomCarInput customCarInput = new CustomCarInput(this);
+    private final AnalyzeForm analyzeForm = new AnalyzeForm(this);
 
     //model
     private final JPickListModel<Parser> parsers = new JPickListModel<Parser>();
@@ -129,6 +132,8 @@ public class MainForm extends JFrame {
         parsers.addItem(ParserFactory.crete(getClass().getClassLoader().getResourceAsStream("auto_ria_ua.properties")));
         parsers.addItem(ParserFactory.crete(getClass().getClassLoader().getResourceAsStream("m_rst_ua.properties")));
 
+        //sources.addItem("http://m.rst.ua/oldcars/?make%5B%5D=49&model%5B%5D=142&body%5B%5D=0&body%5B%5D=0&year%5B%5D=0&year%5B%5D=0&price%5B%5D=0&price%5B%5D=0&region%5B%5D=0&engine%5B%5D=0&engine%5B%5D=0&fuel=0&gear=0&drive=&condition=0&task=newresults&from=sform&http://m.rst.ua/oldcars/?make%5B%5D=49&model%5B%5D=142&body%5B%5D=0&body%5B%5D=0&year%5B%5D=0&year%5B%5D=0&price%5B%5D=0&price%5B%5D=0&region%5B%5D=0&engine%5B%5D=0&engine%5B%5D=0&fuel=0&gear=0&drive=&condition=0&task=newresults&from=sform&start=${page}");
+
         parameters.addItem(new Counter("page", 1, 100));
     }
 
@@ -141,7 +146,6 @@ public class MainForm extends JFrame {
         setTitle("Evaluator");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(new BorderLayout());
-
 
         final JMenuBar menu = new JMenuBar();
         menu.add(ComponentUtils.menu("Actions",
@@ -194,55 +198,55 @@ public class MainForm extends JFrame {
         return allItemTableModel;
     }
 
+    public DataHolder<Items> getAllItemsHolder() {
+        return allItemsHolder;
+    }
+
     private final class LoadFromDiscAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ComponentUtils.executeWithProgressMonitor(MainForm.this,
-                    new ComponentUtils.BackgroundProcessable<Items>(dataReadingService) {
-                        @Override
-                        public void setResult() {
-                            MainForm.this.allItemsHolder.set(getSuccessFullResult());
-                        }
-                    });
+            new ComponentUtils.BackgroundProcessable<Items>(dataReadingService) {
+                @Override
+                public void setResult() {
+                    MainForm.this.allItemsHolder.set(getSuccessFullResult());
+                }
+            }.execute();
         }
     }
 
     private final class LoadFromSourcesAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ComponentUtils.executeWithProgressMonitor(MainForm.this,
-                    new ComponentUtils.BackgroundProcessable<Items>(dataLoadingAndParsingService) {
-                        @Override
-                        public void setResult() {
-                            MainForm.this.allItemsHolder.set(getSuccessFullResult());
-                        }
-                    });
+            new ComponentUtils.BackgroundProcessable<Items>(dataLoadingAndParsingService) {
+                @Override
+                public void setResult() {
+                    MainForm.this.allItemsHolder.set(getSuccessFullResult());
+                }
+            }.execute();
         }
     }
 
     private final class EvaluateAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ComponentUtils.executeWithProgressMonitor(MainForm.this,
-                    new ComponentUtils.BackgroundProcessable<Evaluation>(evaluatingService) {
-                        @Override
-                        public void setResult() {
-                            MainForm.this.evaluationHolder.set(getSuccessFullResult());
-                        }
-                    });
+            new ComponentUtils.BackgroundProcessable<Evaluation>(evaluatingService) {
+                @Override
+                public void setResult() {
+                    MainForm.this.evaluationHolder.set(getSuccessFullResult());
+                }
+            }.execute();
         }
     }
 
     private final class OfferAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ComponentUtils.executeWithProgressMonitor(MainForm.this,
-                    new ComponentUtils.BackgroundProcessable<Items>(offeringService) {
-                        @Override
-                        public void setResult() {
-                            MainForm.this.offerItemsHolder.set(getSuccessFullResult());
-                        }
-                    });
+            new ComponentUtils.BackgroundProcessable<Items>(offeringService) {
+                @Override
+                public void setResult() {
+                    MainForm.this.offerItemsHolder.set(getSuccessFullResult());
+                }
+            }.execute();
         }
     }
 
@@ -281,11 +285,11 @@ public class MainForm extends JFrame {
     private final class AnalyzePriceAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ComponentUtils.showMessage("Not ready yet");
+            analyzeForm.setVisible(true);
         }
     }
 
-    private class ParserOperation implements JPickListItemOperation<Parser> {
+    private final class ParserOperation implements JPickListItemOperation<Parser> {
         @Override
         public void performed(Parser item) {
             Browser.openURL(item.getProperties().getSearch());

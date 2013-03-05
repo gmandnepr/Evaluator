@@ -1,6 +1,5 @@
 package com.gman.evaluator.engine.fields.mrst;
 
-import com.gman.evaluator.engine.ItemImpl;
 import com.gman.evaluator.engine.fields.NumericFieldType;
 
 /**

@@ -1,6 +1,5 @@
 package com.gman.evaluator.engine.fields.autoria;
 
-import com.gman.evaluator.engine.ItemImpl;
 import com.gman.evaluator.engine.fields.NumericFieldType;
 
 /**
@@ -14,6 +13,6 @@ public class FormattedDistanceFieldType extends NumericFieldType {
     @Override
     protected double parse(Object value) {
         final String trimmed = value.toString().trim();
-        return Double.parseDouble(trimmed.substring(0, trimmed.length()-SUFFIX_SIZE)) * 1000.0;
+        return Double.parseDouble(trimmed.substring(0, trimmed.length() - SUFFIX_SIZE)) * 1000.0;
     }
 }

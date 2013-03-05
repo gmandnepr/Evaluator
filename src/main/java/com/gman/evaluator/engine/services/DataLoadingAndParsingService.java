@@ -5,6 +5,7 @@ import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
 import com.gman.evaluator.engine.Parameter;
 import com.gman.evaluator.engine.Parser;
+import com.gman.evaluator.engine.ProcessableCallback;
 import com.gman.evaluator.engine.UrlGenerator;
 import com.gman.evaluator.engine.UrlUtils;
 import com.sun.jersey.api.client.Client;
@@ -27,8 +28,8 @@ public class DataLoadingAndParsingService extends AbstractService<Items> {
     private final Client client = Client.create();
     private final DataHolder<Config> configHolder;
 
-    public DataLoadingAndParsingService(DataHolder<Config> configHolder) {
-        super("Extracting data");
+    public DataLoadingAndParsingService(ProcessableCallback callback, DataHolder<Config> configHolder) {
+        super("Extracting data", callback);
         this.configHolder = configHolder;
     }
 

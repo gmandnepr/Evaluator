@@ -1,7 +1,6 @@
 package com.gman.evaluator.gui;
 
 import com.gman.evaluator.engine.Processable;
-import com.gman.evaluator.engine.ProcessableCallback;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -74,12 +73,6 @@ public final class ComponentUtils {
         JOptionPane.showMessageDialog(parent, message, title, JOptionPane.ERROR_MESSAGE);
     }
 
-    public static <T> void executeWithProgressMonitor(JFrame parent, BackgroundProcessable<T> task) {
-        final JProcessableCallbackImpl progressBar = new JProcessableCallbackImpl(parent, task.getProcessable().getProcessName());
-        task.getProcessable().setCallback(progressBar);
-        task.execute();
-    }
-
     public static abstract class BackgroundProcessable<T> extends SwingWorker<Void, Void> {
 
         private final Processable<T> processable;
@@ -97,7 +90,6 @@ public final class ComponentUtils {
             } catch (Exception e) {
                 this.e = e;
             }
-            processable.setCallback(ProcessableCallback.EMPTY);
             return null;
         }
 

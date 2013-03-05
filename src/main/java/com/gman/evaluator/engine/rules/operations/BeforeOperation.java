@@ -1,7 +1,5 @@
 package com.gman.evaluator.engine.rules.operations;
 
-import com.gman.evaluator.engine.FieldType;
-
 import java.util.Date;
 
 /**

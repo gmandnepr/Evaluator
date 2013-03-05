@@ -3,31 +3,26 @@ package com.gman.evaluator.gui;
 import com.gman.evaluator.engine.ProcessableCallback;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author gman
  * @since 11/30/12 10:34 AM
  */
-public class JProcessableCallbackImpl implements ProcessableCallback {
+public class JProcessableCallbackImpl extends ProgressMonitor implements ProcessableCallback {
 
-    private final ProgressMonitor progressMonitor;
-
-    public JProcessableCallbackImpl(JFrame parent, String name) {
-        progressMonitor = new ProgressMonitor(parent, name, "", 0, 100);
-        progressMonitor.setMillisToPopup(500);
-        progressMonitor.setMillisToDecideToPopup(500);
-    }
-
-    public JProcessableCallbackImpl(ProgressMonitor progressMonitor) {
-        this.progressMonitor = progressMonitor;
+    public JProcessableCallbackImpl(Component parent) {
+        super(parent, "", "", 0, 100);
+        setMillisToPopup(500);
+        setMillisToDecideToPopup(500);
     }
 
     @Override
     public void processed(String status, int done) {
-        if (progressMonitor.isCanceled()) {
+        if (isCanceled()) {
             throw new TaskCanceledException();
         }
-        progressMonitor.setNote(status);
-        progressMonitor.setProgress(done);
+        setNote(status);
+        setProgress(done);
     }
 }

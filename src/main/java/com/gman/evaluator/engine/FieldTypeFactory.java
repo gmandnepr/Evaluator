@@ -1,17 +1,5 @@
 package com.gman.evaluator.engine;
 
-import com.gman.evaluator.engine.fields.AgeFieldType;
-import com.gman.evaluator.engine.fields.AttributeFieldType;
-import com.gman.evaluator.engine.fields.DateFieldType;
-import com.gman.evaluator.engine.fields.EnumFieldType;
-import com.gman.evaluator.engine.fields.LinkFieldType;
-import com.gman.evaluator.engine.fields.NameFieldType;
-import com.gman.evaluator.engine.fields.NumericFieldType;
-import com.gman.evaluator.engine.fields.PriceFieldType;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author gman
  * @since 10.12.12 21:11
