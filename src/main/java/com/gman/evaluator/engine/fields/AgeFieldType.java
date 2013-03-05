@@ -11,7 +11,7 @@ import java.util.Calendar;
  */
 public class AgeFieldType extends NumericFieldType {
 
-    private final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
+    private static final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
     private static final String AGE = "age";
 
     @Override

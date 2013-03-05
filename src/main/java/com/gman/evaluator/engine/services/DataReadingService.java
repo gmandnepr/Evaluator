@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DataReadingService extends AbstractService<Items> {
 
     @Override
-    public Items call() throws Exception {
+    public Items call() {
 
         final AtomicReference<Items> itemsHolder = new AtomicReference<Items>();
 

@@ -27,7 +27,7 @@ public class EvaluatingService extends AbstractService<Evaluation> {
     }
 
     @Override
-    public Evaluation call() throws Exception {
+    public Evaluation call() {
         final Items processing = items.get();
         if (processing.isEmpty()) {
             throw new IllegalStateException("Nothing to evaluate!");

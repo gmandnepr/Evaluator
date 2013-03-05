@@ -64,11 +64,11 @@ public class DateFieldType extends AbstractFieldType {
         }
     }
 
-    private final static String TODAY = "сегодня";
-    private final static String YESTERDAY = "вчера";
+    private static final String TODAY = "сегодня";
+    private static final String YESTERDAY = "вчера";
 
-    private final static Date TODAY_DATE = new Date(System.currentTimeMillis());
-    private final static Date YESTERDAY_DATE = new Date(System.currentTimeMillis() - 24 * 3600 * 1000);
+    private static final Date TODAY_DATE = new Date(System.currentTimeMillis());
+    private static final Date YESTERDAY_DATE = new Date(System.currentTimeMillis() - 24 * 3600 * 1000);
 
     protected static Date getToday() {
         return new Date(TODAY_DATE.getTime());

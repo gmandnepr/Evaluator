@@ -66,14 +66,14 @@ public final class ComponentUtils {
         //developer
         showErrorDialog(null, e.getMessage(), sb.toString());
         //production
-//        showErrorDialog(null, "Error!", e.getMessage());
+        //showErrorDialog(null, "Error!", e.getMessage());
     }
 
     public static void showErrorDialog(JPanel parent, String title, String message) {
         JOptionPane.showMessageDialog(parent, message, title, JOptionPane.ERROR_MESSAGE);
     }
 
-    public static abstract class BackgroundProcessable<T> extends SwingWorker<Void, Void> {
+    public abstract static class BackgroundProcessable<T> extends SwingWorker<Void, Void> {
 
         private final Processable<T> processable;
         private T result;
@@ -84,7 +84,7 @@ public final class ComponentUtils {
         }
 
         @Override
-        protected Void doInBackground() throws Exception {
+        protected Void doInBackground() {
             try {
                 result = processable.call();
             } catch (Exception e) {
@@ -122,10 +122,10 @@ public final class ComponentUtils {
     }
 
     public static void openFileOperation(OpenFileOperation operation) {
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+        if (CHOOSER.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             InputStream is = null;
             try {
-                is = new BufferedInputStream(new FileInputStream(chooser.getSelectedFile()));
+                is = new BufferedInputStream(new FileInputStream(CHOOSER.getSelectedFile()));
                 operation.perform(is);
             } catch (IOException e) {
                 showErrorDialog(e);
@@ -142,10 +142,10 @@ public final class ComponentUtils {
     }
 
     public static void saveFileOperation(SaveFileOperation operation) {
-        if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+        if (CHOOSER.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             OutputStream os = null;
             try {
-                os = new BufferedOutputStream(new FileOutputStream(chooser.getSelectedFile()));
+                os = new BufferedOutputStream(new FileOutputStream(CHOOSER.getSelectedFile()));
                 operation.perform(os);
             } catch (IOException e) {
                 showErrorDialog(e);
@@ -161,15 +161,15 @@ public final class ComponentUtils {
         }
     }
 
-    public static interface OpenFileOperation {
+    public interface OpenFileOperation {
 
         void perform(InputStream is) throws IOException;
     }
 
-    public static interface SaveFileOperation {
+    public interface SaveFileOperation {
 
         void perform(OutputStream os) throws IOException;
     }
 
-    private static final JFileChooser chooser = new JFileChooser();
+    private static final JFileChooser CHOOSER = new JFileChooser();
 }

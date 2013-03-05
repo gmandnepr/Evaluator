@@ -31,14 +31,14 @@ public class LinkFieldType extends TextFieldType {
 
     @Override
     public void inject(ItemImpl item, String propertyName, Object value) {
-        String link = extractString(value);
-        if (link.startsWith("href=\"")) {
-            link = link.substring(6);
+        String theLink = extractString(value);
+        if (theLink.startsWith("href=\"")) {
+            theLink = theLink.substring(6);
         }
-        if (link.endsWith("\"")) {
-            link = link.substring(0, link.length() - 1);
+        if (theLink.endsWith("\"")) {
+            theLink = theLink.substring(0, theLink.length() - 1);
         }
-        item.setLink(this.link + link);
+        item.setLink(this.link + theLink);
     }
 
 }

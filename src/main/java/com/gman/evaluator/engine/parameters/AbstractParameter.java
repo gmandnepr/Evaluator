@@ -25,14 +25,16 @@ public abstract class AbstractParameter<T> implements Parameter<T>, Serializable
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        AbstractParameter that = (AbstractParameter) o;
+        final AbstractParameter that = (AbstractParameter) o;
 
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-
-        return true;
+        return name.equals(that.name);
     }
 
     @Override

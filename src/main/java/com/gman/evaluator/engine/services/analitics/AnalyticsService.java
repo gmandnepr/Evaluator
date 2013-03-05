@@ -24,7 +24,7 @@ public class AnalyticsService extends AbstractService<AnalyticsResult> {
     }
 
     @Override
-    public AnalyticsResult call() throws Exception {
+    public AnalyticsResult call() {
 
         final Items processingItems = itemsHolder.get();
 

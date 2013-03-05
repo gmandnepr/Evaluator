@@ -86,11 +86,6 @@ public class MainForm extends JFrame {
     };
     private final DataHolder<Items> offerItemsHolder = new DataHolder<Items>() {
         @Override
-        protected Items initialValue() {
-            return super.initialValue();
-        }
-
-        @Override
         protected void afterUpdate() {
             offersTableModel.setItems(get());
         }
@@ -137,7 +132,7 @@ public class MainForm extends JFrame {
         parameters.addItem(new Counter("page", 1, 100));
     }
 
-    public MainForm() throws HeadlessException {
+    public MainForm() {
         super();
         init();
     }
@@ -296,7 +291,7 @@ public class MainForm extends JFrame {
         }
     }
 
-    private class ExchangeRateAction implements ActionListener {
+    private final class ExchangeRateAction implements ActionListener {
 
         private final Currency currency;
 

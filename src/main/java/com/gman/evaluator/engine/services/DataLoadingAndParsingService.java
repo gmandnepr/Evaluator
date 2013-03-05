@@ -34,7 +34,7 @@ public class DataLoadingAndParsingService extends AbstractService<Items> {
     }
 
     @Override
-    public Items call() throws Exception {
+    public Items call() {
         int loadedSize = 0;
         int parsedSize = 0;
         int processedSize = 0;
@@ -44,12 +44,12 @@ public class DataLoadingAndParsingService extends AbstractService<Items> {
 
         final Items items = new Items();
 
-        for (final UrlGenerator urlGenerator : usedConfig.urlGenerators) {
+        for (final UrlGenerator urlGenerator : usedConfig.getUrlGenerators()) {
             totalSize += urlGenerator.urlsCount();
         }
 
-        for (final UrlGenerator urlGenerator : usedConfig.urlGenerators) {
-            final Parser parser = usedConfig.parsers.get(urlGenerator.getSite());
+        for (final UrlGenerator urlGenerator : usedConfig.getUrlGenerators()) {
+            final Parser parser = usedConfig.getParsers().get(urlGenerator.getSite());
             if (parser != null) {
                 items.registerProperties(parser.getProperties().getFieldDefinitions());
                 for (final String url : urlGenerator) {
@@ -82,6 +82,14 @@ public class DataLoadingAndParsingService extends AbstractService<Items> {
         public Config(List<UrlGenerator> urlGenerators, Map<String, Parser> parsers) {
             this.urlGenerators = urlGenerators;
             this.parsers = parsers;
+        }
+
+        public List<UrlGenerator> getUrlGenerators() {
+            return urlGenerators;
+        }
+
+        public Map<String, Parser> getParsers() {
+            return parsers;
         }
 
         public static Config create(List<String> sources, List<Parameter<?>> parameters, List<Parser> parsers) {

@@ -19,7 +19,7 @@ public class EvaluatingCarService extends AbstractService<Double> {
     }
 
     @Override
-    public Double call() throws Exception {
+    public Double call() {
         if (evaluationHolder.get() != null && item != null) {
             return evaluationHolder.get().countPriceFor(item);
         } else {

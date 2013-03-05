@@ -30,7 +30,7 @@ public class OfferingService extends AbstractService<Items> {
     }
 
     @Override
-    public Items call() throws Exception {
+    public Items call() {
 
         final Items processingItems = items.get();
         final Evaluation usedEvaluation = evaluation.get();
