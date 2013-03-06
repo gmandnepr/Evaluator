@@ -1,5 +1,7 @@
 package com.gman.evaluator.engine.services.analitics;
 
+import com.gman.evaluator.engine.Evaluation;
+import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
 
 import java.util.Date;
@@ -13,6 +15,8 @@ public class Period {
     private final Date from;
     private final Date to;
     private final Items items;
+    private Evaluation evaluation = null;
+    private double samplePrice = 0;
 
     public Period(Date from, Date to, Items items) {
         this.from = new Date(from.getTime());
@@ -30,5 +34,21 @@ public class Period {
 
     public Items getItems() {
         return items;
+    }
+
+    public Evaluation getEvaluation() {
+        return evaluation;
+    }
+
+    public void setEvaluation(Evaluation evaluation) {
+        this.evaluation = evaluation;
+    }
+
+    public double getSamplePrice() {
+        return samplePrice;
+    }
+
+    public void setSamplePrice(double samplePrice) {
+        this.samplePrice = samplePrice;
     }
 }

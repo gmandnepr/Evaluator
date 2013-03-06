@@ -1,7 +1,9 @@
-package com.gman.evaluator.engine.services.analitics;
+package com.gman.evaluator.engine.services.analitics.separator;
 
 import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
+import com.gman.evaluator.engine.services.analitics.AbstractItemsSeparator;
+import com.gman.evaluator.engine.services.analitics.Period;
 
 import java.util.ArrayList;
 import java.util.Collections;

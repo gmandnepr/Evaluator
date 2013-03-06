@@ -1,4 +1,4 @@
-package com.gman.evaluator.engine.services.analitics;
+package com.gman.evaluator.engine.services.analitics.separator;
 
 /**
  * @author gman

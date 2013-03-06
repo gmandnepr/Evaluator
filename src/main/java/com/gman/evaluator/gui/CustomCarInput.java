@@ -1,7 +1,6 @@
 package com.gman.evaluator.gui;
 
 import com.gman.evaluator.engine.Item;
-import com.gman.evaluator.engine.ItemImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,14 +13,13 @@ import java.awt.event.ActionListener;
  */
 public class CustomCarInput extends JDialog {
 
+    private final JItemCreator itemCreator;
     private Item createdItem = null;
 
     public CustomCarInput(MainForm owner) {
         super(owner, true);
 
-        engineField = new JTextField();
-        distanceField = new JTextField();
-        ageField = new JTextField();
+        itemCreator = new JItemCreator();
 
         initComponents();
     }
@@ -34,15 +32,14 @@ public class CustomCarInput extends JDialog {
         setTitle("Evaluate car");
         setResizable(false);
 
-        getContentPane().setLayout(new GridLayout(4, 2));
-        getContentPane().add(new JLabel("Engine"));
-        getContentPane().add(engineField);
-        getContentPane().add(new JLabel("Distance"));
-        getContentPane().add(distanceField);
-        getContentPane().add(new JLabel("Age"));
-        getContentPane().add(ageField);
-        getContentPane().add(ComponentUtils.activeElement(new JButton("OK"), new OkAction()));
-        getContentPane().add(ComponentUtils.activeElement(new JButton("Cancel"), new CancelAction()));
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(itemCreator, BorderLayout.CENTER);
+
+        final JPanel controlButtons = new JPanel(new GridLayout(1, 2));
+        controlButtons.add(ComponentUtils.activeElement(new JButton("OK"), new OkAction()));
+        controlButtons.add(ComponentUtils.activeElement(new JButton("Cancel"), new CancelAction()));
+
+        getContentPane().add(controlButtons, BorderLayout.SOUTH);
 
         pack();
     }
@@ -51,16 +48,12 @@ public class CustomCarInput extends JDialog {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                final ItemImpl item = new ItemImpl();
-                item.setProperty("engine", Double.parseDouble(engineField.getText()));
-                item.setProperty("distance", Double.parseDouble(distanceField.getText()));
-                item.setProperty("age", Double.parseDouble(ageField.getText()));
-                CustomCarInput.this.createdItem = item;
+                CustomCarInput.this.createdItem = itemCreator.createItem();
+                CustomCarInput.this.setVisible(false);
+                CustomCarInput.this.dispose();
             } catch (NumberFormatException nfe) {
                 ComponentUtils.showErrorDialog(nfe);
             }
-            CustomCarInput.this.setVisible(false);
-            CustomCarInput.this.dispose();
         }
     }
 
@@ -71,9 +64,4 @@ public class CustomCarInput extends JDialog {
             CustomCarInput.this.dispose();
         }
     }
-
-    private final JTextField engineField;
-    private final JTextField distanceField;
-    private final JTextField ageField;
-
 }

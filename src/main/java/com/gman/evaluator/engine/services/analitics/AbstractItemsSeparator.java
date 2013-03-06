@@ -1,6 +1,7 @@
 package com.gman.evaluator.engine.services.analitics;
 
 import com.gman.evaluator.engine.Items;
+import com.gman.evaluator.engine.services.analitics.separator.ItemsSeparator;
 
 import java.util.Date;
 

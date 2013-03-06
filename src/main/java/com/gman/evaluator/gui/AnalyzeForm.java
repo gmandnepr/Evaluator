@@ -6,9 +6,11 @@ import com.gman.evaluator.engine.ProcessableCallback;
 import com.gman.evaluator.engine.services.analitics.AnalyticsConfig;
 import com.gman.evaluator.engine.services.analitics.AnalyticsResult;
 import com.gman.evaluator.engine.services.analitics.AnalyticsService;
-import com.gman.evaluator.engine.services.analitics.ItemsSeparatorFactory;
+import com.gman.evaluator.engine.services.analitics.evaluation.EvaluatorFactory;
+import com.gman.evaluator.engine.services.analitics.separator.ItemsSeparatorFactory;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,9 +24,10 @@ public class AnalyzeForm extends JDialog {
     private final DataHolder<AnalyticsConfig> analyticsConfigHolder = new DataHolder<AnalyticsConfig>(true) {
         @Override
         protected AnalyticsConfig initialValue() {
-            final ItemsSeparatorFactory factory = (ItemsSeparatorFactory) dataSeparatorWays.getSelectedItem();
+            final ItemsSeparatorFactory separatorFactory = (ItemsSeparatorFactory) dataSeparatorWays.getSelectedItem();
+            final EvaluatorFactory evaluatorFactory = (EvaluatorFactory) dataEvaluationWays.getSelectedItem();
 
-            return new AnalyticsConfig(factory.create());
+            return new AnalyticsConfig(separatorFactory.create(), evaluatorFactory.create(), itemCreator.createItem());
         }
     };
     private final DataHolder<Items> itemsHolder;
@@ -32,7 +35,9 @@ public class AnalyzeForm extends JDialog {
     private final AnalyticsService analyticsService;
 
     private final JComboBox<ItemsSeparatorFactory> dataSeparatorWays = new JComboBox<ItemsSeparatorFactory>(ItemsSeparatorFactory.values());
-    private final SeparatedItemsTableModel separatedItemsTableModel = new SeparatedItemsTableModel();
+    private final JComboBox<EvaluatorFactory> dataEvaluationWays = new JComboBox<EvaluatorFactory>(EvaluatorFactory.values());
+    private final JItemCreator itemCreator = new JItemCreator();
+    private final PeriodsTableModel periodsTableModel = new PeriodsTableModel();
 
     private final AnalyticsAction analyticsAction = new AnalyticsAction();
     private final ResetAction resetAction = new ResetAction();
@@ -50,17 +55,17 @@ public class AnalyzeForm extends JDialog {
         setTitle("Analyzer");
         getContentPane().setLayout(new BorderLayout());
 
-        final JPanel configurationPanel = new JPanel(new GridLayout(10, 2));
-        configurationPanel.add(new JLabel("Data separation"));
-        configurationPanel.add(dataSeparatorWays);
-        for (int i = 2; i < 20; i++) {
-            configurationPanel.add(new JLabel("" + i));
-        }
+        dataSeparatorWays.setBorder(new TitledBorder("Data separation"));
+        dataEvaluationWays.setBorder(new TitledBorder("Data evaluation"));
 
+        final JPanel configuration = new JPanel(new GridLayout(3, 1));
+        configuration.add(dataSeparatorWays);
+        configuration.add(dataEvaluationWays);
+        configuration.add(itemCreator);
 
         final JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Configuration", configurationPanel);
-        tabbedPane.addTab("Separated items", ComponentUtils.table(separatedItemsTableModel));
+        tabbedPane.addTab("Configuration", configuration);
+        tabbedPane.addTab("Separated items", ComponentUtils.table(periodsTableModel));
         getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
         final JPanel controls = new JPanel(new GridLayout(1, 4));
@@ -68,7 +73,7 @@ public class AnalyzeForm extends JDialog {
         controls.add(ComponentUtils.activeElement(new JButton("Reset"), resetAction));
         getContentPane().add(controls, BorderLayout.SOUTH);
 
-        setPreferredSize(new Dimension(900, 600));
+        setPreferredSize(new Dimension(600, 400));
         pack();
     }
 
@@ -80,7 +85,7 @@ public class AnalyzeForm extends JDialog {
                 @Override
                 public void setResult() {
                     final AnalyticsResult result = getSuccessFullResult();
-                    separatedItemsTableModel.setPeriods(result.getPeriods());
+                    periodsTableModel.setPeriods(result.getPeriods());
                 }
             }.execute();
         }
@@ -89,7 +94,7 @@ public class AnalyzeForm extends JDialog {
     private final class ResetAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            separatedItemsTableModel.clear();
+            periodsTableModel.clear();
         }
     }
 
