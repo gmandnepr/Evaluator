@@ -4,7 +4,10 @@ package com.gman.evaluator.engine;
  * @author gman
  * @since 10.12.12 21:11
  */
-public class FieldTypeFactory {
+public final class FieldTypeFactory {
+
+    private FieldTypeFactory() {
+    }
 
     public static FieldType create(String type, String properties) {
         try {
@@ -12,7 +15,7 @@ public class FieldTypeFactory {
             fieldType.setProperties(properties);
             return fieldType;
         } catch (Exception e) {
-            throw new IllegalArgumentException("No such type!");
+            throw new IllegalArgumentException("No such type!", e);
         }
     }
 }

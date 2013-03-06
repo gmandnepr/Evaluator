@@ -2,16 +2,9 @@ package com.gman.evaluator.engine.services;
 
 import com.gman.evaluator.engine.DataHolder;
 import com.gman.evaluator.engine.Evaluation;
-import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
-import com.gman.evaluator.engine.Matrix;
 import com.gman.evaluator.engine.services.analitics.evaluation.Evaluator;
 import com.gman.evaluator.engine.services.analitics.evaluation.LinearEvaluator;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author gman

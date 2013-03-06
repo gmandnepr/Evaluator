@@ -17,7 +17,10 @@ import com.gman.evaluator.engine.rules.operations.LessOrEqualsOperation;
  * @author gman
  * @since 15.12.12 15:52
  */
-public class Operations {
+public final class Operations {
+
+    private Operations() {
+    }
 
     public static final Operation[] OPERATIONS = {
             new EqualsOperation(),

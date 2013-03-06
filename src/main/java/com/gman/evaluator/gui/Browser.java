@@ -2,7 +2,10 @@ package com.gman.evaluator.gui;
 
 import java.net.URI;
 
-public class Browser {
+public final class Browser {
+
+    private Browser() {
+    }
 
     public static void openURL(String url) {
         try {

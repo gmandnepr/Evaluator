@@ -3,7 +3,6 @@ package com.gman.evaluator.gui;
 import com.gman.evaluator.engine.services.analitics.Period;
 
 import javax.swing.table.AbstractTableModel;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

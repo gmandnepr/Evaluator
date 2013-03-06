@@ -8,7 +8,10 @@ import java.io.InputStreamReader;
  * @author gman
  * @since 10.12.12 18:03
  */
-public class ParserFactory {
+public final class ParserFactory {
+
+    private ParserFactory() {
+    }
 
     public static Parser crete(InputStream is) {
         try {

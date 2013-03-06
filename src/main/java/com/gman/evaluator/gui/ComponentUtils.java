@@ -110,7 +110,7 @@ public final class ComponentUtils {
                 return getResult();
             } catch (Exception ex) {
                 ComponentUtils.showErrorDialog(ex);
-                throw new RuntimeException(e);
+                throw new RuntimeException(ex);
             }
         }
 

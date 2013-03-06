@@ -77,7 +77,7 @@ public class UrlGenerator implements Iterable<String> {
     public Iterator<String> iterator() {
         return new Iterator<String>() {
 
-            boolean hasNext = true;
+            private boolean hasNext = true;
             private final int paramsNumber;
             private final List<Iterator<?>> iterators = new ArrayList<Iterator<?>>(orderedParams.size());
             private final List<String> values = new ArrayList<String>(orderedParams.size());

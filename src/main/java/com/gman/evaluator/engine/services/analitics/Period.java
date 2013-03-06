@@ -1,7 +1,6 @@
 package com.gman.evaluator.engine.services.analitics;
 
 import com.gman.evaluator.engine.Evaluation;
-import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
 
 import java.util.Date;

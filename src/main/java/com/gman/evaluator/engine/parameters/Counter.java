@@ -24,7 +24,7 @@ public class Counter extends AbstractParameter<Integer> {
     public Iterator<Integer> iterator() {
         return new Iterator<Integer>() {
 
-            int current = from - 1;
+            private int current = from - 1;
 
             public boolean hasNext() {
                 return current < to;
