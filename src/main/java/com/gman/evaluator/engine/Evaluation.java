@@ -49,4 +49,13 @@ public class Evaluation {
         }
         return profit;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Double> entry : getFieldsAndPrices()) {
+            sb.append(entry.getKey()).append(": ").append(String.format("%.2f", entry.getValue())).append('\n');
+        }
+        return sb.toString();
+    }
 }

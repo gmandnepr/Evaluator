@@ -16,6 +16,7 @@ public class Period {
     private final Items items;
     private Evaluation evaluation = null;
     private double samplePrice = 0;
+    private boolean predicted = false;
 
     public Period(Date from, Date to, Items items) {
         this.from = new Date(from.getTime());
@@ -49,5 +50,13 @@ public class Period {
 
     public void setSamplePrice(double samplePrice) {
         this.samplePrice = samplePrice;
+    }
+
+    public boolean isPredicted() {
+        return predicted;
+    }
+
+    public void setPredicted(boolean predicted) {
+        this.predicted = predicted;
     }
 }

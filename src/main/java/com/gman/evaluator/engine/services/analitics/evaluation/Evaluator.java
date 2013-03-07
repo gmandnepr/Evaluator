@@ -8,6 +8,6 @@ import com.gman.evaluator.engine.Items;
  * @since 06.03.13 19:40
  */
 public interface Evaluator {
-    
+
     Evaluation evaluate(Items items);
 }

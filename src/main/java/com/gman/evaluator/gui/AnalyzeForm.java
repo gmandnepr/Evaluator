@@ -38,6 +38,8 @@ public class AnalyzeForm extends JDialog {
     private final JComboBox<EvaluatorFactory> dataEvaluationWays = new JComboBox<EvaluatorFactory>(EvaluatorFactory.values());
     private final JItemCreator itemCreator = new JItemCreator();
     private final PeriodsTableModel periodsTableModel = new PeriodsTableModel();
+    private final OffersChartModel offersChartModel = new OffersChartModel();
+    private final PriceChartModel priceChartModel = new PriceChartModel();
 
     private final AnalyticsAction analyticsAction = new AnalyticsAction();
     private final ResetAction resetAction = new ResetAction();
@@ -66,6 +68,8 @@ public class AnalyzeForm extends JDialog {
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Configuration", configuration);
         tabbedPane.addTab("Separated items", ComponentUtils.table(periodsTableModel));
+        tabbedPane.addTab("Offers", ComponentUtils.chart(offersChartModel));
+        tabbedPane.addTab("Price", ComponentUtils.chart(priceChartModel));
         getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
         final JPanel controls = new JPanel(new GridLayout(1, 4));
@@ -86,6 +90,8 @@ public class AnalyzeForm extends JDialog {
                 public void setResult() {
                     final AnalyticsResult result = getSuccessFullResult();
                     periodsTableModel.setPeriods(result.getPeriods());
+                    offersChartModel.setPeriods(result.getPeriods());
+                    priceChartModel.setPeriods(result.getPeriods());
                 }
             }.execute();
         }
@@ -95,6 +101,8 @@ public class AnalyzeForm extends JDialog {
         @Override
         public void actionPerformed(ActionEvent e) {
             periodsTableModel.clear();
+            offersChartModel.clear();
+            priceChartModel.clear();
         }
     }
 
