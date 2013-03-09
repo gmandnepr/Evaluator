@@ -41,6 +41,8 @@ public class AnalyticsService extends AbstractService<AnalyticsResult> {
             period.setSamplePrice(price);
         }
 
-        return new AnalyticsResult(periods);
+        final List<Period> predictions = config.getPeriodPredictor().predict(periods);
+
+        return new AnalyticsResult(periods, predictions);
     }
 }

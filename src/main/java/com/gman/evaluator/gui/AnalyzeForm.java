@@ -48,6 +48,7 @@ public class AnalyzeForm extends JDialog {
     private final JComboBox<PeriodPredictorFactory> periodPredictorWays = new JComboBox<PeriodPredictorFactory>(PeriodPredictorFactory.values());
     private final JItemCreator itemCreator = new JItemCreator();
     private final PeriodsTableModel periodsTableModel = new PeriodsTableModel();
+    private final PeriodsTableModel predictionTableModel = new PeriodsTableModel();
     private final OffersChartModel offersChartModel = new OffersChartModel();
     private final PriceChartModel priceChartModel = new PriceChartModel();
 
@@ -82,6 +83,7 @@ public class AnalyzeForm extends JDialog {
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Configuration", configuration);
         tabbedPane.addTab("Separated items", ComponentUtils.table(periodsTableModel));
+        tabbedPane.addTab("Predictions", ComponentUtils.table(predictionTableModel));
         tabbedPane.addTab("Offers", ComponentUtils.chart(offersChartModel));
         tabbedPane.addTab("Price", ComponentUtils.chart(priceChartModel));
         getContentPane().add(tabbedPane, BorderLayout.CENTER);
@@ -104,8 +106,9 @@ public class AnalyzeForm extends JDialog {
                 public void setResult() {
                     final AnalyticsResult result = getSuccessFullResult();
                     periodsTableModel.setPeriods(result.getPeriods());
-                    offersChartModel.setPeriods(result.getPeriods());
-                    priceChartModel.setPeriods(result.getPeriods());
+                    predictionTableModel.setPeriods(result.getPrediction());
+                    offersChartModel.setPeriods(result.getPeriods(), result.getPrediction());
+                    priceChartModel.setPeriods(result.getPeriods(), result.getPrediction());
                 }
             }.execute();
         }

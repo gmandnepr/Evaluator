@@ -26,6 +26,6 @@ public abstract class AbstractItemsSeparator implements ItemsSeparator {
             }
         }
 
-        return new Period(first, last, items);
+        return new Period(first.getTime(), last.getTime(), items, items.size());
     }
 }

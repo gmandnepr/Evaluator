@@ -3,33 +3,44 @@ package com.gman.evaluator.engine.services.analitics;
 import com.gman.evaluator.engine.Evaluation;
 import com.gman.evaluator.engine.Items;
 
-import java.util.Date;
-
 /**
  * @author gman
  * @since 04.03.13 21:39
  */
 public class Period {
 
-    private final Date from;
-    private final Date to;
+    private final long startTime;
+    private final long endTime;
     private final Items items;
-    private Evaluation evaluation = null;
-    private double samplePrice = 0;
-    private boolean predicted = false;
+    private int offers;
+    private Evaluation evaluation;
+    private double samplePrice;
 
-    public Period(Date from, Date to, Items items) {
-        this.from = new Date(from.getTime());
-        this.to = new Date(to.getTime());
+    public Period(long startTime, long endTime, Items items, int offers) {
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.items = items;
+        this.offers = offers;
     }
 
-    public Date getFrom() {
-        return from;
+    public long getStartTime() {
+        return startTime;
     }
 
-    public Date getTo() {
-        return to;
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public long getMiddleTime() {
+        return startTime / 2 + endTime / 2;
+    }
+
+    public int getOffers() {
+        return offers;
+    }
+
+    public void setOffers(int offers) {
+        this.offers = offers;
     }
 
     public Items getItems() {
@@ -50,13 +61,5 @@ public class Period {
 
     public void setSamplePrice(double samplePrice) {
         this.samplePrice = samplePrice;
-    }
-
-    public boolean isPredicted() {
-        return predicted;
-    }
-
-    public void setPredicted(boolean predicted) {
-        this.predicted = predicted;
     }
 }

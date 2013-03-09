@@ -10,5 +10,7 @@ import java.util.List;
  */
 public interface PeriodPredictor {
 
+    int PERIOD_TO_PREDICT = 6;
+
     List<Period> predict(List<Period> history);
 }

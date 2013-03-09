@@ -77,7 +77,7 @@ public class MainForm extends JFrame {
             try {
                 return new DefaultAbnormalRemover().remove(allItemsHolder.get());
             } catch (Exception e) {
-                throw  new RuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
 

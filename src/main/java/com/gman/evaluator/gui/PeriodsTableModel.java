@@ -68,11 +68,11 @@ public class PeriodsTableModel extends AbstractTableModel {
         final Period period = periods.get(rowIndex);
         switch (columnIndex) {
             case 0:
-                return period.getFrom();
+                return period.getStartTime();
             case 1:
-                return period.getTo();
+                return period.getEndTime();
             case 2:
-                return period.getItems().size();
+                return period.getOffers();
             default:
                 return period.getSamplePrice();
         }
