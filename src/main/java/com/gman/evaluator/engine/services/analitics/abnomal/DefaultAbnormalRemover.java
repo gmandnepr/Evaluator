@@ -1,5 +1,7 @@
 package com.gman.evaluator.engine.services.analitics.abnomal;
 
+import com.gman.evaluator.engine.FieldDefinition;
+import com.gman.evaluator.engine.FieldType;
 import com.gman.evaluator.engine.Item;
 import com.gman.evaluator.engine.Items;
 
@@ -32,54 +34,57 @@ public class DefaultAbnormalRemover implements AbnormalRemover {
 
         Items processing = items.copyAll();
 
-        final Set<String> properties = processing.getDeclaredProperties();
+        final Set<FieldDefinition> fields = items.getRegisteredFields();
 
-        for (String property : properties) {
+        for (FieldDefinition field : fields) {
 
-            Collections.sort(processing, new PropertyComparator(property));
+            final FieldType fieldType = field.getFieldType();
 
-            final int index = processing.size() / 2;
+            if (fieldType.type().equals(Double.class)) {
+                final String property = field.getName();
 
-            int abnormalStartIndex = -1;
-            for (int i = index; i > 0; i--) {
-                final Item o1 = processing.get(i - 1);
-                final Item o2 = processing.get(i);
-                if (tooBigDifference(o1, o2, property)) {
-                    abnormalStartIndex = i;
-                    break;
+                Collections.sort(processing, new PropertyComparator(fieldType, property));
+
+                final int abnormalStartIndex = findStartAbnormalIndex(processing, fieldType, property);
+                final int abnormalEndIndex = findEndAbnormalIndex(processing, fieldType, property);
+
+                if (abnormalStartIndex != 0 || abnormalEndIndex != processing.size() - 1) {
+                    //abnormal found
+                    final Items filtered = processing.copyStructure();
+                    filtered.addAll(processing.subList(abnormalStartIndex, abnormalEndIndex));
+                    processing = filtered;
                 }
-            }
-            if (abnormalStartIndex == -1) {
-                abnormalStartIndex = 0;
-            }
-
-            int abnormalEndIndex = -1;
-            for (int i = index; i < processing.size() - 1; i++) {
-                final Item o1 = processing.get(i);
-                final Item o2 = processing.get(i + 1);
-                if (tooBigDifference(o1, o2, property)) {
-                    abnormalEndIndex = i;
-                    break;
-                }
-            }
-            if (abnormalEndIndex == -1) {
-                abnormalEndIndex = processing.size() - 1;
-            }
-
-            if (abnormalStartIndex != 0 || abnormalEndIndex != processing.size() - 1) {
-                //abnormal found
-                final Items filtered = processing.copyStructure();
-                filtered.addAll(processing.subList(abnormalStartIndex, abnormalEndIndex));
-                processing = filtered;
             }
         }
 
         return processing;
     }
 
-    private boolean tooBigDifference(Item o1, Item o2, String propertyName) {
-        final double v1 = o1.getProperty(propertyName);
-        final double v2 = o2.getProperty(propertyName);
+    private int findStartAbnormalIndex(Items processing, FieldType fieldType, String property) {
+        for (int i = processing.size() / 2; i > 0; i--) {
+            final Item o1 = processing.get(i - 1);
+            final Item o2 = processing.get(i);
+            if (tooBigDifference(o1, o2, fieldType, property)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private int findEndAbnormalIndex(Items processing, FieldType fieldType, String property) {
+        for (int i = processing.size() / 2; i < processing.size() - 1; i++) {
+            final Item o1 = processing.get(i);
+            final Item o2 = processing.get(i + 1);
+            if (tooBigDifference(o1, o2, fieldType, property)) {
+                return i;
+            }
+        }
+        return processing.size() - 1;
+    }
+
+    private boolean tooBigDifference(Item o1, Item o2, FieldType fieldType, String propertyName) {
+        final double v1 = (Double) fieldType.retrieve(o1, propertyName);
+        final double v2 = (Double) fieldType.retrieve(o2, propertyName);
 
         final double difference = (v2 - v1) / v2;
 
@@ -94,15 +99,20 @@ public class DefaultAbnormalRemover implements AbnormalRemover {
 
     private static final class PropertyComparator implements Comparator<Item> {
 
+        private final FieldType fieldType;
         private final String property;
 
-        private PropertyComparator(String property) {
+        private PropertyComparator(FieldType fieldType, String property) {
+            this.fieldType = fieldType;
             this.property = property;
         }
 
         @Override
         public int compare(Item o1, Item o2) {
-            return Double.compare(o1.getProperty(property), o2.getProperty(property));
+            final double v1 = (Double) fieldType.retrieve(o1, property);
+            final double v2 = (Double) fieldType.retrieve(o2, property);
+
+            return Double.compare(v1, v2);
         }
     }
 }
