@@ -1,11 +1,8 @@
 package com.gman.evaluator.gui;
 
 import com.gman.evaluator.engine.Processable;
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.data.xy.AbstractXYDataset;
 
 import javax.swing.*;
@@ -32,13 +29,8 @@ public final class ComponentUtils {
         return new JScrollPane(new JTable(model));
     }
 
-    public static JComponent chart(AbstractXYDataset model) {
-        return new ChartPanel(
-                new JFreeChart(
-                        new XYPlot(model,
-                                new NumberAxis(),
-                                new NumberAxis(),
-                                new StandardXYItemRenderer(StandardXYItemRenderer.LINES))));
+    public static JComponent timeChart(AbstractXYDataset model) {
+        return new ChartPanel(ChartFactory.createTimeSeriesChart("", "", "", model, true, false, false));
     }
 
     public static JComponent splitView(JComponent comp1, JComponent comp2, int ratio) {

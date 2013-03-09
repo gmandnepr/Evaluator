@@ -84,8 +84,8 @@ public class AnalyzeForm extends JDialog {
         tabbedPane.addTab("Configuration", configuration);
         tabbedPane.addTab("Separated items", ComponentUtils.table(periodsTableModel));
         tabbedPane.addTab("Predictions", ComponentUtils.table(predictionTableModel));
-        tabbedPane.addTab("Offers", ComponentUtils.chart(offersChartModel));
-        tabbedPane.addTab("Price", ComponentUtils.chart(priceChartModel));
+        tabbedPane.addTab("Offers", ComponentUtils.timeChart(offersChartModel));
+        tabbedPane.addTab("Price", ComponentUtils.timeChart(priceChartModel));
         getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
         final JPanel controls = new JPanel(new GridLayout(1, 4));
