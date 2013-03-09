@@ -28,9 +28,10 @@ public class AnalyticsService extends AbstractService<AnalyticsResult> {
     public AnalyticsResult call() {
 
         final AnalyticsConfig config = analyticsConfigHolder.get();
-        final Items processingItems = itemsHolder.get();
+        final Items originalItems = itemsHolder.get();
 
-        final List<Period> periods = analyticsConfigHolder.get().getSeparator().separate(processingItems);
+        final Items processingItems = config.getAbnormalRemover().remove(originalItems);
+        final List<Period> periods = config.getSeparator().separate(processingItems);
 
         for (Period period : periods) {
             final Evaluation evaluation = config.getEvaluator().evaluate(period.getItems());

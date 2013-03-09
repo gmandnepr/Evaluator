@@ -131,7 +131,7 @@ public class RuleCreator extends JDialog implements ComponentCreator<Rule> {
 
     private void updateFields() {
         fieldDefinitions.clear();
-        fieldDefinitions.addAll(parent.getAllItemTableModel().getItems().getRegisteredFields());
+        fieldDefinitions.addAll(parent.getItemTableModel().getItems().getRegisteredFields());
         fields.updateUI();
     }
 

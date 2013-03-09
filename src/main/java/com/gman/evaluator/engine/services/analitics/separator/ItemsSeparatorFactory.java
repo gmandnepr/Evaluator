@@ -6,20 +6,19 @@ package com.gman.evaluator.engine.services.analitics.separator;
  */
 public enum ItemsSeparatorFactory {
 
-    BY_DATE(ByDateSeparator.class),
-    BY_SIZE(BySizeSeparator.class);
+    BY_DATE(new ByDateSeparator()),
+    BY_SIZE_25(new BySizeSeparator(25)),
+    BY_SIZE_50(new BySizeSeparator(50)),
+    BY_SIZE_100(new BySizeSeparator(100)),
+    BY_SIZE_250(new BySizeSeparator(250));
 
-    private final Class<? extends ItemsSeparator> clazz;
+    private final ItemsSeparator impl;
 
-    private ItemsSeparatorFactory(Class<? extends ItemsSeparator> clazz) {
-        this.clazz = clazz;
+    private ItemsSeparatorFactory(ItemsSeparator impl) {
+        this.impl = impl;
     }
 
     public ItemsSeparator create() {
-        try {
-            return this.clazz.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return impl;
     }
 }

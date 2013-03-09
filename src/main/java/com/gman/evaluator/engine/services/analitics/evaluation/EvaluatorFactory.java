@@ -6,19 +6,15 @@ package com.gman.evaluator.engine.services.analitics.evaluation;
  */
 public enum EvaluatorFactory {
 
-    LINEAR(LinearEvaluator.class);
+    LINEAR(new LinearEvaluator());
 
-    private final Class<? extends Evaluator> clazz;
+    private final Evaluator impl;
 
-    private EvaluatorFactory(Class<? extends Evaluator> clazz) {
-        this.clazz = clazz;
+    private EvaluatorFactory(Evaluator impl) {
+        this.impl = impl;
     }
 
     public Evaluator create() {
-        try {
-            return this.clazz.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return impl;
     }
 }

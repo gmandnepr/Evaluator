@@ -57,7 +57,7 @@ public class OfferingService extends AbstractService<Items> {
         return offer;
     }
 
-    private static class ProfitComparator implements Comparator<Item> {
+    private static final class ProfitComparator implements Comparator<Item> {
 
         @Override
         public int compare(Item o1, Item o2) {

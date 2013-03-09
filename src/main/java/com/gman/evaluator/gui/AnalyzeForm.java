@@ -6,7 +6,9 @@ import com.gman.evaluator.engine.ProcessableCallback;
 import com.gman.evaluator.engine.services.analitics.AnalyticsConfig;
 import com.gman.evaluator.engine.services.analitics.AnalyticsResult;
 import com.gman.evaluator.engine.services.analitics.AnalyticsService;
+import com.gman.evaluator.engine.services.analitics.abnomal.AbnormalRemoverFactory;
 import com.gman.evaluator.engine.services.analitics.evaluation.EvaluatorFactory;
+import com.gman.evaluator.engine.services.analitics.prediction.PeriodPredictorFactory;
 import com.gman.evaluator.engine.services.analitics.separator.ItemsSeparatorFactory;
 
 import javax.swing.*;
@@ -25,9 +27,15 @@ public class AnalyzeForm extends JDialog {
         @Override
         protected AnalyticsConfig initialValue() {
             final ItemsSeparatorFactory separatorFactory = (ItemsSeparatorFactory) dataSeparatorWays.getSelectedItem();
+            final AbnormalRemoverFactory abnormalRemoverFactory = (AbnormalRemoverFactory) abnormalRemoverWays.getSelectedItem();
             final EvaluatorFactory evaluatorFactory = (EvaluatorFactory) dataEvaluationWays.getSelectedItem();
+            final PeriodPredictorFactory periodPredictorFactory = (PeriodPredictorFactory) periodPredictorWays.getSelectedItem();
 
-            return new AnalyticsConfig(separatorFactory.create(), evaluatorFactory.create(), itemCreator.createItem());
+            return new AnalyticsConfig(separatorFactory.create(),
+                    abnormalRemoverFactory.create(),
+                    evaluatorFactory.create(),
+                    periodPredictorFactory.create(),
+                    itemCreator.createItem());
         }
     };
     private final DataHolder<Items> itemsHolder;
@@ -35,7 +43,9 @@ public class AnalyzeForm extends JDialog {
     private final AnalyticsService analyticsService;
 
     private final JComboBox<ItemsSeparatorFactory> dataSeparatorWays = new JComboBox<ItemsSeparatorFactory>(ItemsSeparatorFactory.values());
+    private final JComboBox<AbnormalRemoverFactory> abnormalRemoverWays = new JComboBox<AbnormalRemoverFactory>(AbnormalRemoverFactory.values());
     private final JComboBox<EvaluatorFactory> dataEvaluationWays = new JComboBox<EvaluatorFactory>(EvaluatorFactory.values());
+    private final JComboBox<PeriodPredictorFactory> periodPredictorWays = new JComboBox<PeriodPredictorFactory>(PeriodPredictorFactory.values());
     private final JItemCreator itemCreator = new JItemCreator();
     private final PeriodsTableModel periodsTableModel = new PeriodsTableModel();
     private final OffersChartModel offersChartModel = new OffersChartModel();
@@ -58,11 +68,15 @@ public class AnalyzeForm extends JDialog {
         getContentPane().setLayout(new BorderLayout());
 
         dataSeparatorWays.setBorder(new TitledBorder("Data separation"));
+        abnormalRemoverWays.setBorder(new TitledBorder("Abnormal data removing"));
         dataEvaluationWays.setBorder(new TitledBorder("Data evaluation"));
+        periodPredictorWays.setBorder(new TitledBorder("Prediction"));
 
-        final JPanel configuration = new JPanel(new GridLayout(3, 1));
+        final JPanel configuration = new JPanel(new GridLayout(5, 1));
         configuration.add(dataSeparatorWays);
+        configuration.add(abnormalRemoverWays);
         configuration.add(dataEvaluationWays);
+        configuration.add(periodPredictorWays);
         configuration.add(itemCreator);
 
         final JTabbedPane tabbedPane = new JTabbedPane();

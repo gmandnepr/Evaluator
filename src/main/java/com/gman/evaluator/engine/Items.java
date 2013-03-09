@@ -31,6 +31,10 @@ public class Items extends ArrayList<Item> {
         fieldDefinitions.clear();
     }
 
+    public Set<String> getDeclaredProperties() {
+        return !isEmpty() ? get(0).getDeclaredProperties() : Collections.<String>emptySet();
+    }
+
     public Items copyStructure() {
         final Items copy = new Items();
         copy.registerProperties(getRegisteredFields());

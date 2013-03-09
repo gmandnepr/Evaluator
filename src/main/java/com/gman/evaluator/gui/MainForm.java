@@ -15,7 +15,9 @@ import com.gman.evaluator.engine.services.DataLoadingAndParsingService;
 import com.gman.evaluator.engine.services.DataReadingService;
 import com.gman.evaluator.engine.services.EvaluatingCarService;
 import com.gman.evaluator.engine.services.EvaluatingService;
+import com.gman.evaluator.engine.services.FilteringService;
 import com.gman.evaluator.engine.services.OfferingService;
+import com.gman.evaluator.engine.services.analitics.abnomal.DefaultAbnormalRemover;
 import com.gman.evaluator.gui.components.ParameterCreator;
 import com.gman.evaluator.gui.components.ParserCreator;
 import com.gman.evaluator.gui.components.RuleCreator;
@@ -50,12 +52,12 @@ public class MainForm extends JFrame {
         @Override
         protected Items initialValue() {
             try {
-                final int option = ComponentUtils.showOptionsDialog("Obtain data", "From selected urls", "From disc", "Restart");
+                final int option = ComponentUtils.showOptionsDialog("Obtain data", "From disc", "From selected urls", "Restart");
                 switch (option) {
                     case 0:
-                        return dataLoadingAndParsingService.call();
-                    case 1:
                         return dataReadingService.call();
+                    case 1:
+                        return dataLoadingAndParsingService.call();
                     default:
                         throw new IllegalArgumentException("Nothing selected!");
                 }
@@ -66,7 +68,22 @@ public class MainForm extends JFrame {
 
         @Override
         protected void afterUpdate() {
-            allItemTableModel.setItems(get());
+            itemTableModel.setItems(get());
+        }
+    };
+    private final DataHolder<Items> filteredItemsHolder = new DataHolder<Items>() {
+        @Override
+        protected Items initialValue() {
+            try {
+                return new DefaultAbnormalRemover().remove(allItemsHolder.get());
+            } catch (Exception e) {
+                throw  new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected void afterUpdate() {
+            itemTableModel.setItems(get());
         }
     };
     private final DataHolder<Evaluation> evaluationHolder = new DataHolder<Evaluation>() {
@@ -96,8 +113,9 @@ public class MainForm extends JFrame {
     //services
     private final DataReadingService dataReadingService = new DataReadingService();
     private final DataLoadingAndParsingService dataLoadingAndParsingService = new DataLoadingAndParsingService(processMonitor, dataLoadingAndParsingConfigHolder);
-    private final EvaluatingService evaluatingService = new EvaluatingService(allItemsHolder);
-    private final OfferingService offeringService = new OfferingService(allItemsHolder, evaluationHolder, rulesHolder);
+    private final FilteringService filteringService = new FilteringService(allItemsHolder);
+    private final EvaluatingService evaluatingService = new EvaluatingService(filteredItemsHolder);
+    private final OfferingService offeringService = new OfferingService(filteredItemsHolder, evaluationHolder, rulesHolder);
     private final EvaluatingCarService evaluatingCarService = new EvaluatingCarService(evaluationHolder);
 
     //forms
@@ -108,7 +126,7 @@ public class MainForm extends JFrame {
     private final JPickListModel<Parser> parsers = new JPickListModel<Parser>();
     private final JPickListModel<String> sources = new JPickListModel<String>();
     private final JPickListModel<Parameter<?>> parameters = new JPickListModel<Parameter<?>>();
-    private final ItemTableModel allItemTableModel = new ItemTableModel();
+    private final ItemTableModel itemTableModel = new ItemTableModel();
     private final EvaluationsTableModel evaluationsTableModel = new EvaluationsTableModel();
     private final JPickListModel<Rule> rules = new JPickListModel<Rule>();
     private final ItemTableModel offersTableModel = new ItemTableModel();
@@ -116,6 +134,7 @@ public class MainForm extends JFrame {
     //actions
     private final LoadFromDiscAction loadFromDiscAction = new LoadFromDiscAction();
     private final LoadFromSourcesAction loadFromSourcesAction = new LoadFromSourcesAction();
+    private final FilterAction filterAction = new FilterAction();
     private final EvaluateAction evaluateAction = new EvaluateAction();
     private final OfferAction offerAction = new OfferAction();
     private final AboutAction aboutAction = new AboutAction();
@@ -130,6 +149,8 @@ public class MainForm extends JFrame {
         sources.addItem("http://m.rst.ua/oldcars/?make%5B%5D=49&model%5B%5D=142&body%5B%5D=0&body%5B%5D=0&year%5B%5D=0&year%5B%5D=0&price%5B%5D=0&price%5B%5D=0&region%5B%5D=0&engine%5B%5D=0&engine%5B%5D=0&fuel=0&gear=0&drive=&condition=0&task=newresults&from=sform&http://m.rst.ua/oldcars/?make%5B%5D=49&model%5B%5D=142&body%5B%5D=0&body%5B%5D=0&year%5B%5D=0&year%5B%5D=0&price%5B%5D=0&price%5B%5D=0&region%5B%5D=0&engine%5B%5D=0&engine%5B%5D=0&fuel=0&gear=0&drive=&condition=0&task=newresults&from=sform&start=${page}");
 
         parameters.addItem(new Counter("page", 1, 100));
+
+
     }
 
     public MainForm() {
@@ -168,15 +189,16 @@ public class MainForm extends JFrame {
         pane.add("Parsers", new JPickList<Parser>(parsers, new ParserCreator(), new ParserOperation()));
         pane.add("Sources", new JPickList<String>(sources, new UrlCreator(this)));
         pane.add("Params", new JPickList<Parameter<?>>(parameters, new ParameterCreator(this)));
-        pane.add("Items", new JItemsViewer(allItemTableModel));
+        pane.add("Items", new JItemsViewer(itemTableModel));
         pane.add("Evaluations", ComponentUtils.table(evaluationsTableModel));
         pane.add("Rules", new JPickList<Rule>(rules, new RuleCreator(this)));
         pane.add("Offers", new JItemsViewer(offersTableModel));
         getContentPane().add(pane, BorderLayout.CENTER);
 
-        final JPanel controls = new JPanel(new GridLayout(1, 4));
+        final JPanel controls = new JPanel(new GridLayout(1, 5));
         controls.add(ComponentUtils.activeElement(new JButton("Load from disc"), loadFromDiscAction));
         controls.add(ComponentUtils.activeElement(new JButton("Load from sources"), loadFromSourcesAction));
+        controls.add(ComponentUtils.activeElement(new JButton("Filter"), filterAction));
         controls.add(ComponentUtils.activeElement(new JButton("Evaluate"), evaluateAction));
         controls.add(ComponentUtils.activeElement(new JButton("Offer"), offerAction));
         getContentPane().add(controls, BorderLayout.SOUTH);
@@ -189,8 +211,8 @@ public class MainForm extends JFrame {
         return parsers;
     }
 
-    public ItemTableModel getAllItemTableModel() {
-        return allItemTableModel;
+    public ItemTableModel getItemTableModel() {
+        return itemTableModel;
     }
 
     public DataHolder<Items> getAllItemsHolder() {
@@ -216,6 +238,18 @@ public class MainForm extends JFrame {
                 @Override
                 public void setResult() {
                     MainForm.this.allItemsHolder.set(getSuccessFullResult());
+                }
+            }.execute();
+        }
+    }
+
+    private final class FilterAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            new ComponentUtils.BackgroundProcessable<Items>(filteringService) {
+                @Override
+                public void setResult() {
+                    MainForm.this.filteredItemsHolder.set(getSuccessFullResult());
                 }
             }.execute();
         }
