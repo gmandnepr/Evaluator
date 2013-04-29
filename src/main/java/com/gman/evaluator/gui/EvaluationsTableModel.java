@@ -19,7 +19,7 @@ public class EvaluationsTableModel extends AbstractTableModel {
     public void setEvaluation(Evaluation evaluation) {
         this.evaluation = evaluation;
         this.fieldAndPrice.clear();
-        this.fieldAndPrice.addAll(evaluation.getFieldsAndPrices());
+        this.fieldAndPrice.addAll(evaluation.getFieldsAndCoefficients());
         fireTableDataChanged();
     }
 

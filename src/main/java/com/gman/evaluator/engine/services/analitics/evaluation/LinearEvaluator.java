@@ -8,6 +8,7 @@ import com.gman.evaluator.engine.Matrix;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -65,7 +66,34 @@ public class LinearEvaluator implements Evaluator {
         final List<String> properties = new ArrayList<String>();
         properties.add(Evaluation.BASE);
         properties.addAll(extractedProperties);
-        final Evaluation evaluation = new Evaluation();
+        final Evaluation evaluation = new Evaluation() {
+
+            @Override
+            public double countPriceFor(Item item) {
+                double itemPrice = 0.0;
+                for (Map.Entry<String, Double> price : coefficients.entrySet()) {
+                    if (price.getKey().equals(BASE)) {
+                        itemPrice += price.getValue();
+                    } else {
+                        itemPrice += item.getProperty(price.getKey()) * price.getValue();
+                    }
+                }
+                return itemPrice;
+            }
+
+            @Override
+            public double countProfitFor(Item item) {
+                double profit = -item.getPrice();
+                for (Map.Entry<String, Double> price : coefficients.entrySet()) {
+                    if (price.getKey().equals(BASE)) {
+                        profit += price.getValue();
+                    } else {
+                        profit += item.getProperty(price.getKey()) * price.getValue();
+                    }
+                }
+                return profit;
+            }
+        };
         for (int i = 0; i < properties.size(); i++) {
             evaluation.addPrice(properties.get(i), a.getElement(i, 0));
         }

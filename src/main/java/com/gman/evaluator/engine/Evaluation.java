@@ -8,52 +8,32 @@ import java.util.Set;
  * @author gman
  * @since 01.12.12 20:11
  */
-public class Evaluation {
+public abstract class Evaluation {
 
     public static final String BASE = "base";
 
-    private final Map<String, Double> prices = new HashMap<String, Double>();
+    protected final Map<String, Double> coefficients = new HashMap<String, Double>();
 
-    public void addPrice(String field, double price) {
-        this.prices.put(field, price);
+    public void addPrice(String field, double coefficient) {
+        this.coefficients.put(field, coefficient);
     }
 
-    public Double getPrice(String field) {
-        return this.prices.get(field);
+    public Double getCoefficient(String field) {
+        return this.coefficients.get(field);
     }
 
-    public Set<Map.Entry<String, Double>> getFieldsAndPrices() {
-        return this.prices.entrySet();
+    public Set<Map.Entry<String, Double>> getFieldsAndCoefficients() {
+        return this.coefficients.entrySet();
     }
 
-    public double countPriceFor(Item item) {
-        double itemPrice = 0.0;
-        for (Map.Entry<String, Double> price : prices.entrySet()) {
-            if (price.getKey().equals(BASE)) {
-                itemPrice += price.getValue();
-            } else {
-                itemPrice += item.getProperty(price.getKey()) * price.getValue();
-            }
-        }
-        return itemPrice;
-    }
+    public abstract double countPriceFor(Item item);
 
-    public double countProfitFor(Item item) {
-        double profit = -item.getPrice();
-        for (Map.Entry<String, Double> price : prices.entrySet()) {
-            if (price.getKey().equals(BASE)) {
-                profit += price.getValue();
-            } else {
-                profit += item.getProperty(price.getKey()) * price.getValue();
-            }
-        }
-        return profit;
-    }
+    public abstract double countProfitFor(Item item);
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Double> entry : getFieldsAndPrices()) {
+        for (Map.Entry<String, Double> entry : getFieldsAndCoefficients()) {
             sb.append(entry.getKey()).append(": ").append(String.format("%.2f", entry.getValue())).append('\n');
         }
         return sb.toString();
