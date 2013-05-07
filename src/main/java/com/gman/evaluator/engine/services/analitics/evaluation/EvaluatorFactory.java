@@ -6,7 +6,8 @@ package com.gman.evaluator.engine.services.analitics.evaluation;
  */
 public enum EvaluatorFactory {
 
-    LINEAR(new LinearEvaluator());
+    LINEAR(new LinearEvaluator()),
+    POLINOM(new PolinomEvaluator("distance", 0.5, "age", 1.2, "engine", 1.0));
 
     private final Evaluator impl;
 

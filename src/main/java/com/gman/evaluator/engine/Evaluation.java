@@ -28,7 +28,9 @@ public abstract class Evaluation {
 
     public abstract double countPriceFor(Item item);
 
-    public abstract double countProfitFor(Item item);
+    public double countProfitFor(Item item) {
+        return countPriceFor(item) - item.getPrice();
+    }
 
     @Override
     public String toString() {

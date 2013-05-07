@@ -128,21 +128,43 @@ public final class ComponentUtils {
         public abstract void setResult();
     }
 
+    public static void openFileOperation(OpenFileOperation operation, String path) {
+        InputStream is = null;
+        try {
+            is = new BufferedInputStream(new FileInputStream(path));
+            operation.perform(is);
+        } catch (IOException e) {
+            showErrorDialog(e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    showErrorDialog(e);
+                }
+            }
+        }
+    }
+
     public static void openFileOperation(OpenFileOperation operation) {
         if (CHOOSER.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            InputStream is = null;
-            try {
-                is = new BufferedInputStream(new FileInputStream(CHOOSER.getSelectedFile()));
-                operation.perform(is);
-            } catch (IOException e) {
-                showErrorDialog(e);
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        showErrorDialog(e);
-                    }
+            openFileOperation(operation, CHOOSER.getSelectedFile().getPath());
+        }
+    }
+
+    public static void saveFileOperation(SaveFileOperation operation, String path) {
+        OutputStream os = null;
+        try {
+            os = new BufferedOutputStream(new FileOutputStream(path));
+            operation.perform(os);
+        } catch (IOException e) {
+            showErrorDialog(e);
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    showErrorDialog(e);
                 }
             }
         }
@@ -150,21 +172,7 @@ public final class ComponentUtils {
 
     public static void saveFileOperation(SaveFileOperation operation) {
         if (CHOOSER.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            OutputStream os = null;
-            try {
-                os = new BufferedOutputStream(new FileOutputStream(CHOOSER.getSelectedFile()));
-                operation.perform(os);
-            } catch (IOException e) {
-                showErrorDialog(e);
-            } finally {
-                if (os != null) {
-                    try {
-                        os.close();
-                    } catch (IOException e) {
-                        showErrorDialog(e);
-                    }
-                }
-            }
+            saveFileOperation(operation, CHOOSER.getSelectedFile().getPath());
         }
     }
 

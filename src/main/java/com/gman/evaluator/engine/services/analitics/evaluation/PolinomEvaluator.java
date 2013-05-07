@@ -7,23 +7,49 @@ import com.gman.evaluator.engine.Matrix;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * @author gman
- * @since 06.03.13 19:41
+ * @since 02.05.13 20:30
  */
-public class LinearEvaluator implements Evaluator {
+public class PolinomEvaluator implements Evaluator {
+
+    private final Map<String, Double> propertyStrength = new LinkedHashMap<String, Double>();
+
+    public PolinomEvaluator() {
+    }
+
+    public PolinomEvaluator(String property0, double strength0,
+                            String property1, double strength1,
+                            String property2, double strength2) {
+        propertyStrength.put(property0, strength0);
+        propertyStrength.put(property1, strength1);
+        propertyStrength.put(property2, strength2);
+    }
 
     @Override
     public Evaluation evaluate(Items items) {
         final List<String> extractedProperties = extractProperties(items);
+        checkAcceptableModel(extractedProperties);
         final Matrix x = createMatrixX(items, extractedProperties);
         final Matrix y = createMatrixY(items);
         final Matrix a = countRegressionCoefficients(x, y);
         return extractEvaluation(a, extractedProperties);
+    }
+
+    public Map<String, Double> getPropertyStrength() {
+        return propertyStrength;
+    }
+
+    private void checkAcceptableModel(List<String> extractedProperties) {
+
+        if (!propertyStrength.keySet().containsAll(extractedProperties)) {
+            throw new IllegalArgumentException("Wrong model");
+        }
     }
 
     private List<String> extractProperties(Items processing) {
@@ -42,7 +68,11 @@ public class LinearEvaluator implements Evaluator {
         for (Item item : processing) {
             x.setElement(i, 0, 1.0);
             for (int p = 0; p < propertiesNum; p++) {
-                x.setElement(i, p + 1, item.getProperty(extractedProperties.get(p)));
+                final String property = extractedProperties.get(p);
+                final double value = item.getProperty(property);
+                final double strength = propertyStrength.get(property);
+
+                x.setElement(i, p + 1, Math.pow(value, strength));
             }
             i++;
         }
@@ -79,7 +109,11 @@ public class LinearEvaluator implements Evaluator {
                     if (price.getKey().equals(BASE)) {
                         itemPrice += price.getValue();
                     } else {
-                        itemPrice += item.getProperty(price.getKey()) * price.getValue();
+                        final String property = price.getKey();
+                        final double value = item.getProperty(property);
+                        final double strength = propertyStrength.get(property);
+
+                        itemPrice += Math.pow(value, strength) * price.getValue();
                     }
                 }
                 return itemPrice;
@@ -89,5 +123,10 @@ public class LinearEvaluator implements Evaluator {
             evaluation.addPrice(properties.get(i), a.getElement(i, 0));
         }
         return evaluation;
+    }
+
+    @Override
+    public String toString() {
+        return PolinomEvaluator.class.getName() + ": " + propertyStrength.toString();
     }
 }
