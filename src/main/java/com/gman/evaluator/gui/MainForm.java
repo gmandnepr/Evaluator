@@ -143,14 +143,9 @@ public class MainForm extends JFrame {
     private final AnalyzePriceAction analyzePriceAction = new AnalyzePriceAction();
 
     {
-        parsers.addItem(ParserFactory.crete(getClass().getClassLoader().getResourceAsStream("auto_ria_ua.properties")));
         parsers.addItem(ParserFactory.crete(getClass().getClassLoader().getResourceAsStream("m_rst_ua.properties")));
 
-        sources.addItem("http://m.rst.ua/oldcars/?make%5B%5D=49&model%5B%5D=142&body%5B%5D=0&body%5B%5D=0&year%5B%5D=0&year%5B%5D=0&price%5B%5D=0&price%5B%5D=0&region%5B%5D=0&engine%5B%5D=0&engine%5B%5D=0&fuel=0&gear=0&drive=&condition=0&task=newresults&from=sform&http://m.rst.ua/oldcars/?make%5B%5D=49&model%5B%5D=142&body%5B%5D=0&body%5B%5D=0&year%5B%5D=0&year%5B%5D=0&price%5B%5D=0&price%5B%5D=0&region%5B%5D=0&engine%5B%5D=0&engine%5B%5D=0&fuel=0&gear=0&drive=&condition=0&task=newresults&from=sform&start=${page}");
-
         parameters.addItem(new Counter("page", 1, 100));
-
-
     }
 
     public MainForm() {
